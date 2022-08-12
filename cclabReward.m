@@ -9,17 +9,26 @@ function [success] = cclabReward(msec)
 
         global g_reward;
 
-        % Create square wave
-        nsamples = floor(msec/1000.0 * g_reward.daq.Rate) + 2;
-        s = 5 * ones(nsamples, 1);
-        s(1) = 0;
-        s(end) = 0;
+        if g_reward.type == "j"
 
-        % preload and start
-        preload(g_reward.daq, s);
-        start(g_reward.daq);
+            % Create square wave
+            nsamples = floor(msec/1000.0 * g_reward.daq.Rate) + 2;
+            s = 5 * ones(nsamples, 1);
+            s(1) = 0;
+            s(end) = 0;
+    
+            % preload and start
+            preload(g_reward.daq, s);
+            start(g_reward.daq);
+    
+            %TODO we don't really know this, but let's declare success!
+            success = 1;
 
-        %TODO we don't really know this, but let's declare success!
-        success = 1;
+        elseif g_reward.type == "n"
+
+            fprintf('cclabReward: dummy reward of %dms\n', msec);
+            success = 1;
+            
+        end
     end
 end
