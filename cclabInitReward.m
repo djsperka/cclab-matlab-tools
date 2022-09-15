@@ -20,6 +20,7 @@ if isempty(g_reward)
             g_reward.type = "j";
             g_reward.daq = daq("ni");
             g_reward.daq.Rate = 5000;
+            g_reward.tic = tic;
             addoutput(g_reward.daq, "Dev1", "ao0", "Voltage");
             success = 1;
         else
