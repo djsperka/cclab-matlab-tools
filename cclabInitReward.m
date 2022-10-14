@@ -8,13 +8,13 @@ success = 0;
 % g_reward is not empty if it was init'd elsewhere
 if isempty(g_reward)
 
-    % enumerate daq devices, according to daq toolbox...
-    daqs = daqlist();
-
     % WARNING! Assuming that there is a single daq device, and that the
     % first one is the ni PCIe-6351. If that changes, or if another card is
     % added to the machine, this will something more clever. djs
     if strcmpi(rewtype, "j")
+        % enumerate daq devices, according to daq toolbox...
+        daqs = daqlist();
+
         if strcmp(daqs.Model(1), "PCIe-6351")
             % create daq object, populate it
             g_reward.type = "j";
