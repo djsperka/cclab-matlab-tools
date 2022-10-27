@@ -19,6 +19,8 @@ cfg.reward_gap = 250;
 % eye tracker config (TODO)
 cfg.eyelink_dummymode = 1;
 
+% size of photodiode square, in pixels 
+cfg.marker_rect = [0, 0, 40, 40];
 
 % initializations - experimental parameters
 cfg.background_color=[128, 128, 128];
@@ -51,4 +53,5 @@ cfg.fixpt_rect = [0, 0, cfg.ppdX*cfg.fixpt_diameter_deg, cfg.ppdY*cfg.fixpt_diam
 cfg.fixation_window_rect = [0, 0, cfg.fixpt_diameter_deg * cfg.ppdX, cfg.fixpt_diameter_deg * cfg.ppdY];
 
 
-afix(cfg);
+%afix(cfg);
+bfix(cfg);
