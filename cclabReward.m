@@ -44,7 +44,7 @@ function [success, s] = cclabReward(varargin)
             else
                 g_reward.tic = tic;
 %                 preload(g_reward.daq, s);
-%                 start(g_reward.daq);
+                %start(g_reward.daq);
                 write(g_reward.daq, s);
             end
 
