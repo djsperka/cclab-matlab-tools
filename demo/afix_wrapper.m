@@ -1,14 +1,16 @@
 % initializations - per "rig"
-cfg.screen_number = 0;
+cfg.screen_number = 2;
 
 % mac
 % cfg.screen_rect = [1280 750 1680 1050];
 % linux, 
-cfg.screen_rect = [1520 900 1920 1200];
+%cfg.screen_rect = [1520 900 1920 1200];
+% lab
+cfg.screen_rect = [];
 
 % this is probably linked to the screen rect, but not now
-cfg.screen_visible_mm = [80, 60];
-cfg.screen_distance_mm = 200;
+cfg.screen_visible_mm = [700, 390];
+cfg.screen_distance_mm = 800;
 
 % Juicer
 cfg.reward_type = 'n';
@@ -20,7 +22,7 @@ cfg.reward_gap = 250;
 cfg.eyelink_dummymode = 1;
 
 % size of photodiode square, in pixels 
-cfg.marker_rect = [0, 0, 40, 40];
+cfg.marker_rect = [0, 0, 200, 200];
 
 % initializations - experimental parameters
 cfg.background_color=[128, 128, 128];
@@ -39,7 +41,8 @@ cfg.verbose = 1;
 % computed after initializations
 
 % screen resolution, in pixels
-cfg.screen_resolution = [cfg.screen_rect(3)-cfg.screen_rect(1), cfg.screen_rect(4)-cfg.screen_rect(2)];
+%cfg.screen_resolution = [cfg.screen_rect(3)-cfg.screen_rect(1), cfg.screen_rect(4)-cfg.screen_rect(2)];
+cfg.screen_resolution = [1920, 1080];
 
 % used for unit conversions between pixels & degrees
 cfg.ppdX = cfg.screen_resolution(1)/atan(0.5*cfg.screen_visible_mm(1)/cfg.screen_distance_mm)*pi/180;

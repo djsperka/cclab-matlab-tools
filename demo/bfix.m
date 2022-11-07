@@ -10,13 +10,18 @@ function [] = bfix(cfg)
 
 
     % Open window
+    %InitializeMatlabOpenGL(1,3,1);
+    Screen('Preference', 'SkipSyncTests', 1);
     [wp, wrect] = Screen('OpenWindow', cfg.screen_number, cfg.background_color, cfg.screen_rect);
-    Screen('FillRect', wp, cfg.background_color);
 
+%     Mask = 0;
+%     Command = 0;
+%     Data = zeros(1,248);
+%     Data(1:10) = 0x8000;
+%     BitsPlusPlus('DIOCommand', wp, -1, Mask, Data, Command);
 
-
-    pauseSec = 0.5;
-    maxStimFrames = 20;
+    pauseSec = 1.0;
+    maxStimFrames = 200;
     stimLoopFrames = 4;
     bQuit = 0;
     bGo = 0;
@@ -62,6 +67,7 @@ function [] = bfix(cfg)
         end                                 
     end
 
+    %BitsPlusPlus('DIOCommandReset', wp);
     ListenChar(0);
     sca;
 
@@ -71,7 +77,7 @@ function [tflip] = drawScreen(cfg, wp, x)
     Screen('FillRect', wp, cfg.background_color);
     if ~isempty(x) && isscalar(x)
         % rect for drawing photodiode square
-        marker_rect_pos = [0, cfg.screen_resolution(2)-cfg.marker_rect(4), cfg.marker_rect(3), cfg.screen_resolution(2)];
+        marker_rect_pos = [cfg.screen_resolution(1)-cfg.marker_rect(3), cfg.screen_resolution(2)-cfg.marker_rect(4), cfg.screen_resolution(1), cfg.screen_resolution(2)];
         Screen('FillRect', wp, [x*255, x*255, x*255], marker_rect_pos);
     end
     tflip = Screen('Flip', wp);
