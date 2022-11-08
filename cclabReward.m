@@ -7,7 +7,7 @@ function [success, s] = cclabReward(varargin)
         error('reward system not ready - call cclabInitReward()');
     else
 
-        global g_reward;
+        global g_dio;
         p = inputParser;
         addRequired(p, 'msec', @(x) isnumeric(x) && isscalar(x) && (x > 0));
         addOptional(p, 'n', 1, @(x) isnumeric(x) && isscalar(x) && (x > 0));
@@ -15,14 +15,14 @@ function [success, s] = cclabReward(varargin)
         addParameter(p, 'margin', 50, @(x) isnumeric(x) && isscalar(x) && (x > 0))
         parse(p, varargin{:});
 
-        if g_reward.type == "j"
+        if g_dio.reward.type == "j"
 
             % make automatic end margin of MARGIN size with 0V output.
             % Will have (n-1) * gap
             % number of samples in the reward signal and in the gap
-            nmargin = floor(p.Results.margin/1000.0 * g_reward.daq.Rate);
-            nrew = floor(p.Results.msec/1000.0 * g_reward.daq.Rate);
-            ngap = floor(p.Results.gap/1000.0 * g_reward.daq.Rate);
+            nmargin = floor(p.Results.margin/1000.0 * g_dio.reward.daq.Rate);
+            nrew = floor(p.Results.msec/1000.0 * g_dio.reward.daq.Rate);
+            ngap = floor(p.Results.gap/1000.0 * g_dio.reward.daq.Rate);
             nsamples = 2*nmargin + p.Results.n * nrew + (p.Results.n-1) * ngap;
         
             % 5 V samples, first and last GAP are zero.
@@ -37,22 +37,22 @@ function [success, s] = cclabReward(varargin)
             end
     
             % preload and start
-            %fprintf('cclabReward(): running? %d, preload length %d, time since last reward %f\n', g_reward.daq.Running, length(s), toc(g_reward.tic));
-            if g_reward.daq.Running
-                fprintf('Warning - Previous reward scan is running, time since is %f!\n', toc(g_reward.tic));
-                %g_reward.daq
+            %fprintf('cclabReward(): running? %d, preload length %d, time since last reward %f\n', g_dio.reward.daq.Running, length(s), toc(g_dio.reward.tic));
+            if g_dio.reward.daq.Running
+                fprintf('Warning - Previous reward scan is running, time since is %f!\n', toc(g_dio.reward.tic));
+                %g_dio.reward.daq
             else
-                g_reward.tic = tic;
-%                 preload(g_reward.daq, s);
-                %start(g_reward.daq);
-                write(g_reward.daq, s);
+                g_dio.reward.tic = tic;
+%                 preload(g_dio.reward.daq, s);
+                %start(g_dio.reward.daq);
+                write(g_dio.reward.daq, s);
             end
 
 %             z=0;
-%             while z<10 && g_reward.daq.Running
+%             while z<10 && g_dio.reward.daq.Running
 %                 z = z+1;
-%                 fprintf('waiting... pause .2s %d, time since %f\n', z, toc(g_reward.tic));
-%                 g_reward.daq
+%                 fprintf('waiting... pause .2s %d, time since %f\n', z, toc(g_dio.reward.tic));
+%                 g_dio.reward.daq
 %                 pause(.1);
 %             end
 
@@ -60,7 +60,7 @@ function [success, s] = cclabReward(varargin)
             %TODO we don't really know this, but let's declare success!
             success = 1;
 
-        elseif g_reward.type == "n"
+        elseif g_dio.reward.type == "n"
 
             fprintf('cclabReward: dummy reward of %dms, n=%d, gap=%dms\n', p.Results.msec, p.Results.n, p.Results.gap);
             success = 1;
