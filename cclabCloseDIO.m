@@ -13,6 +13,6 @@ function cclabCloseDIO()
         stop(g_dio.daqClock);
         g_dio.daqClock = [];
         g_dio.daqAB = [];
-        clear global g_dio;
     end
+    clear global g_dio;
 end
