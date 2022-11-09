@@ -3,25 +3,27 @@ function [] = bfix(cfg)
 %   Detailed explanation goes here
 
 
+    % Init dio, no reward
+    cclabInitDIO('AB');
+
     %  kb stuff
     ListenChar(2); % disable kb input at matlab command window
     KbName('UnifyKeyNames');
 
-
-
     % Open window
     %InitializeMatlabOpenGL(1,3,1);
     Screen('Preference', 'SkipSyncTests', 1);
-    [wp, wrect] = Screen('OpenWindow', cfg.screen_number, cfg.background_color, cfg.screen_rect);
+    %[wp, wrect] = Screen('OpenWindow', cfg.screen_number, cfg.background_color, cfg.screen_rect);
+    BitsPlusPlus('SetColorConversionMode', 2);
+    [wp, wrect] = BitsPlusPlus('OpenWindowColor++', cfg.screen_number, cfg.background_color, cfg.screen_rect);
 
-%     Mask = 0;
-%     Command = 0;
-%     Data = zeros(1,248);
-%     Data(1:10) = 0x8000;
-%     BitsPlusPlus('DIOCommand', wp, -1, Mask, Data, Command);
+    trigData = zeros(1, 248);
+    trigData(1, 1:10) = 32768;
+    BitsPlusPlus('DIOCommand', wp, -1, 0, 255, trigData, 0, 1, 2);
+    cfg.window_rect = wrect;
 
-    pauseSec = 1.0;
-    maxStimFrames = 200;
+    pauseSec = 0.25;
+    maxStimFrames = 800;
     stimLoopFrames = 4;
     bQuit = 0;
     bGo = 0;
@@ -50,7 +52,9 @@ function [] = bfix(cfg)
                     state = "STIM";
                 end
             case "STIM"
-                drawScreen(cfg, wp, mod(nFrames, stimLoopFrames)/stimLoopFrames);
+                drawScreenNoFlip(cfg, wp, mod(nFrames, 2));
+                tflip = Screen('Flip', wp);
+                cclabPulse('B');
                 nFrames = nFrames + 1;
                 if nFrames == maxStimFrames
                     state = "DONE";
@@ -61,26 +65,30 @@ function [] = bfix(cfg)
                 WaitSecs(pauseSec);
                 state = "STIM";
             case "DONE"
-                drawScreen(cfg, wp, 0);
+                drawScreenNoFlip(cfg, wp, 0);
+                Screen('Flip', wp);
             otherwise
                 error("Unhandled state %s\n", state);
         end                                 
     end
 
-    %BitsPlusPlus('DIOCommandReset', wp);
+    BitsPlusPlus('DIOCommandReset', wp);
     ListenChar(0);
     sca;
+    cclabCloseDIO();
 
 end
 
-function [tflip] = drawScreen(cfg, wp, x)
+function [tflip] = drawScreenNoFlip(cfg, wp, x)
     Screen('FillRect', wp, cfg.background_color);
     if ~isempty(x) && isscalar(x)
         % rect for drawing photodiode square
-        marker_rect_pos = [cfg.screen_resolution(1)-cfg.marker_rect(3), cfg.screen_resolution(2)-cfg.marker_rect(4), cfg.screen_resolution(1), cfg.screen_resolution(2)];
-        Screen('FillRect', wp, [x*255, x*255, x*255], marker_rect_pos);
+        % 'center', 'left', 'right', 'top', and 'bottom'. 
+        r=AlignRect(cfg.marker_rect ,cfg.window_rect, cfg.marker_rect_side1, cfg.marker_rect_side2);
+        %marker_rect_pos = [cfg.screen_resolution(1)-cfg.marker_rect(3), cfg.screen_resolution(2)-cfg.marker_rect(4), cfg.screen_resolution(1), cfg.screen_resolution(2)];
+        %Screen('FillRect', wp, [x*255, x*255, x*255], r);
+        Screen('FillRect', wp, [x, x, x], r);
     end
-    tflip = Screen('Flip', wp);
 end
     
 function [] = mylogger(cfg, str)

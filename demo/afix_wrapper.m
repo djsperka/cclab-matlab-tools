@@ -24,8 +24,13 @@ cfg.eyelink_dummymode = 1;
 % size of photodiode square, in pixels 
 cfg.marker_rect = [0, 0, 200, 200];
 
+% position of photodiode square, see doc for AlignRect
+cfg.marker_rect_side1 = 'top';
+cfg.marker_rect_side2 = 'left';
+
 % initializations - experimental parameters
-cfg.background_color=[128, 128, 128];
+%cfg.background_color=[128, 128, 128];
+cfg.background_color=[.5, .5, .5];
 cfg.fixation_color = [0, 0, 255];
 cfg.output_folder='/Users/dan/Documents/MATLAB';
 cfg.fixpt_diameter_deg = 0.5;
