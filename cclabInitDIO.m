@@ -9,7 +9,7 @@ function [] = cclabInitDIO(types)
 % 
 
     rewardRate = 5000;
-    abRate = 1000;
+    abRate = 1000000;
     global g_dio;
     
     % First - check for "j" or "n", and then deal with the reward setup.
@@ -71,7 +71,8 @@ function [] = cclabInitDIO(types)
             g_dio.daqClock = daq("ni");
             addoutput(g_dio.daqClock, "Dev1", "ctr0", "PulseGeneration");
             g_dio.daqClock.Channels(1).Frequency=abRate;
-            start(g_dio.daqClock, "continuous");
+            g_dio.daqClock.Rate = abRate;
+            start(g_dio.daqClock, "Continuous");
         else
             error("cclabInitDIO: Cannot find ni PCIe-6351");
         end
@@ -88,11 +89,11 @@ function [] = cclabInitDIO(types)
         if strcmp(daqs.Model(1), "PCIe-6351")
             % create daq object, populate it
             g_dio.daqAB = daq("ni");
-            g_dio.daqAB.Rate=abRate;
             addoutput(g_dio.daqAB, "Dev1", "port0/line4", "Digital"); % A
             addoutput(g_dio.daqAB, "Dev1", "port0/line3", "Digital"); % B
             terminal = g_dio.daqClock.Channels(1).Terminal;
             addclock(g_dio.daqAB, "ScanClock", "External", strcat('Dev1/', terminal));
+            g_dio.daqAB.Rate=abRate;
         else
             error("cclabInitDIO: Cannot find ni PCIe-6351");
         end
