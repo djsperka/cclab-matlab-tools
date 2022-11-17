@@ -71,8 +71,10 @@ function [] = bfix(cfg)
                 error("Unhandled state %s\n", state);
         end                                 
     end
-
-    BitsPlusPlus('DIOCommandReset', wp);
+    if cfg.doBitsPlusPlus
+        BitsPlusPlus('DIOCommandReset', wp);
+        BitsPlusPlus('Close');
+    end
     ListenChar(0);
     sca;
     cclabCloseDIO();
