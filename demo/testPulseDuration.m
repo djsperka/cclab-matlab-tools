@@ -7,10 +7,9 @@ times = zeros(nPulses, 1);
 t0 = GetSecs();
 cclabInitDIO('AB');
 for i=1:nPulses
-    t0 = GetSecs();
+    times(i) = GetSecs();
     cclabPulse('B', tPulseLengthMS);
-    times(i) = GetSecs() - t0;
-    WaitSecs(.1);
+    %WaitSecs(.1);
 end
 cclabCloseDIO();
 return;
