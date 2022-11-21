@@ -26,7 +26,7 @@ cfg.marker_rect = [0, 0, 200, 200];
 
 % position of photodiode square, see doc for AlignRect
 cfg.marker_rect_side1 = 'top';
-cfg.marker_rect_side2 = 'left';
+cfg.marker_rect_side2 = 'right';
 
 % initializations - experimental parameters
 %cfg.background_color=[128, 128, 128];
@@ -41,6 +41,7 @@ cfg.fixpt_pos_deg = [0, 0];
 
 % other
 cfg.verbose = 1;
+cfg.doBitsPlusPlus = 0;
 
 
 % computed after initializations

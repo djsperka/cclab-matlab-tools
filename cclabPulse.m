@@ -43,7 +43,7 @@ function [success, sample] = cclabPulse(varargin)
         % just a single pulse
 
         sample = [0 0];
-        sample(column) = 0;
+        sample(column) = 1;
         write(g_dio.daqAB, sample);
         WaitSecs(tPulseWidthMS / 1000);
         write(g_dio.daqAB, [0 0]);

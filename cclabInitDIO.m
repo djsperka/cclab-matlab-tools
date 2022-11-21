@@ -95,7 +95,7 @@ function [] = cclabInitDIO(types)
             addoutput(g_dio.daqAB, "Dev1", "port0/line3", "Digital"); % B
             %terminal = g_dio.daqClock.Channels(1).Terminal;
             %addclock(g_dio.daqAB, "ScanClock", "External", strcat('Dev1/', terminal));
-            %g_dio.daqAB.Rate=abRate;
+            g_dio.daqAB.Rate=abRate;
         else
             error("cclabInitDIO: Cannot find ni PCIe-6351");
         end
