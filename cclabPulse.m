@@ -39,22 +39,33 @@ function [success, sample] = cclabPulse(varargin)
             column = 2;
         end
 
-        % how many samples, at current rate, in a single pulse?
-        rate = g_dio.daqAB.Rate;
-        pSamples = floor(tPulseWidthMS / 1000 * rate);
+        % spinlock implementation here, using WaitSecs
+        % just a single pulse
 
-        % how many samples in the gaps?
-        gSamples = floor(pulseGapMS / 1000 * rate);
-
-        % total number of samples needed. 
-        % Note the number of channels is hard-coded here! Two columns.
-        % Only the channel 'A' or 'B' gets pulsed. 
-        n = nPulses*pSamples + (nPulses-1)*gSamples + 1;
-        sample = zeros(n, 2);
-        for i=1:nPulses
-            sample((i-1)*(pSamples + gSamples)+1:(i-1)*(pSamples + gSamples)+pSamples, column) = 1;
-        end
+        sample = [0 0];
+        sample(column) = 0;
         write(g_dio.daqAB, sample);
+        WaitSecs(tPulseWidthMS / 1000);
+        write(g_dio.daqAB, [0 0]);
+
+
+
+%         % how many samples, at current rate, in a single pulse?
+%         rate = g_dio.daqAB.Rate;
+%         pSamples = floor(tPulseWidthMS / 1000 * rate);
+% 
+%         % how many samples in the gaps?
+%         gSamples = floor(pulseGapMS / 1000 * rate);
+% 
+%         % total number of samples needed. 
+%         % Note the number of channels is hard-coded here! Two columns.
+%         % Only the channel 'A' or 'B' gets pulsed. 
+%         n = nPulses*pSamples + (nPulses-1)*gSamples + 1;
+%         sample = zeros(n, 2);
+%         for i=1:nPulses
+%             sample((i-1)*(pSamples + gSamples)+1:(i-1)*(pSamples + gSamples)+pSamples, column) = 1;
+%         end
+%         write(g_dio.daqAB, sample);
 
     end
 end

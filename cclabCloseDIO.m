@@ -10,8 +10,8 @@ function cclabCloseDIO()
 
     global g_dio;
     if ~isempty(g_dio)
-        stop(g_dio.daqClock);
-        g_dio.daqClock = [];
+        % spinlock stop(g_dio.daqClock);
+        % spinlock g_dio.daqClock = [];
         g_dio.daqAB = [];
     end
     clear global g_dio;

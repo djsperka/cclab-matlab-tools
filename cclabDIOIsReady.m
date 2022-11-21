@@ -4,7 +4,7 @@ function [isready] = cclabDIOIsReady()
 
     global g_dio;
     isready = 0;
-    if ~isempty(g_dio) && isfield(g_dio, 'daqAB') && isfield(g_dio, 'daqClock')
+    if ~isempty(g_dio) && isfield(g_dio, 'daqAB') % SPINLOCK  && isfield(g_dio, 'daqClock')
         isready = 1;
     end
 
