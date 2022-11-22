@@ -11,15 +11,15 @@ function [] = bfix(cfg)
     KbName('UnifyKeyNames');
 
     % Open window
-    %InitializeMatlabOpenGL(1,3,1);
     Screen('Preference', 'SkipSyncTests', 1);
-    %[wp, wrect] = Screen('OpenWindow', cfg.screen_number, cfg.background_color, cfg.screen_rect);
-    BitsPlusPlus('SetColorConversionMode', 2);
-    [wp, wrect] = BitsPlusPlus('OpenWindowColor++', cfg.screen_number, cfg.background_color, cfg.screen_rect);
+    [wp, wrect] = Screen('OpenWindow', cfg.screen_number, cfg.background_color, cfg.screen_rect);
+    %InitializeMatlabOpenGL(1,3,1);
+    %BitsPlusPlus('SetColorConversionMode', 2);
+    %[wp, wrect] = BitsPlusPlus('OpenWindowColor++', cfg.screen_number, cfg.background_color, cfg.screen_rect);
+    %BitsPlusPlus('DIOCommand', wp, -1, 0, 255, trigData, 0, 1, 2);
 
     trigData = zeros(1, 248);
     trigData(1, 1:10) = 32768;
-    BitsPlusPlus('DIOCommand', wp, -1, 0, 255, trigData, 0, 1, 2);
     cfg.window_rect = wrect;
 
     pauseSec = 0.25;
