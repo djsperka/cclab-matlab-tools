@@ -21,6 +21,7 @@ cfg.reward_gap = 250;
 % eye tracker config (TODO)
 cfg.eyelink_dummymode = 1;
 cfg.doBitsPlusPlus = 0;
+cfg.SkipSyncTests = 1;
 
 % size of photodiode square, in pixels 
 cfg.marker_rect = [0, 0, 200, 200];
@@ -30,15 +31,9 @@ cfg.marker_rect_side1 = 'top';
 cfg.marker_rect_side2 = 'right';
 
 % initializations - experimental parameters
-%cfg.background_color=[128, 128, 128];
+% colors  [0,1] not [0 255]
 cfg.background_color=[.5, .5, .5];
-cfg.fixation_color = [0, 0, 255];
 cfg.output_folder='/Users/dan/Documents/MATLAB';
-cfg.fixpt_diameter_deg = 0.5;
-cfg.max_acquisition_time = 5.0;
-cfg.fixation_time = 1.0;
-cfg.intertrial_time = 1.0;
-cfg.fixpt_pos_deg = [0, 0];
 
 % other
 cfg.verbose = 1;

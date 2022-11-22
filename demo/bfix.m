@@ -11,18 +11,22 @@ function [] = bfix(cfg)
     KbName('UnifyKeyNames');
 
     % Open window
-    Screen('Preference', 'SkipSyncTests', 1);
-    [wp, wrect] = Screen('OpenWindow', cfg.screen_number, cfg.background_color, cfg.screen_rect);
-    %InitializeMatlabOpenGL(1,3,1);
-    %BitsPlusPlus('SetColorConversionMode', 2);
-    %[wp, wrect] = BitsPlusPlus('OpenWindowColor++', cfg.screen_number, cfg.background_color, cfg.screen_rect);
-    %BitsPlusPlus('DIOCommand', wp, -1, 0, 255, trigData, 0, 1, 2);
+    Screen('Preference', 'SkipSyncTests', cfg.SkipSyncTests);
 
+    if cfg.doBitsPlusPlus
+        InitializeMatlabOpenGL(1,3,1);
+        BitsPlusPlus('SetColorConversionMode', 2);
+        [wp, wrect] = BitsPlusPlus('OpenWindowColor++', cfg.screen_number, cfg.background_color, cfg.screen_rect);
+        BitsPlusPlus('DIOCommand', wp, -1, 0, 255, trigData, 0, 1, 2);
+    else
+        [wp, wrect] = Screen('OpenWindow', cfg.screen_number, 255*cfg.background_color, cfg.screen_rect);
+    end
     trigData = zeros(1, 248);
     trigData(1, 1:10) = 32768;
     cfg.window_rect = wrect;
 
     pauseSec = 0.25;
+    pulseWidth = 0.1; % ms
     maxStimFrames = 800;
     stimLoopFrames = 4;
     bQuit = 0;
@@ -52,9 +56,14 @@ function [] = bfix(cfg)
                     state = "STIM";
                 end
             case "STIM"
-                drawScreenNoFlip(cfg, wp, mod(nFrames, 2));
+                cclabPulse('A', pulseWidth);
+                drawScreenNoFlip(cfg, wp, 255*mod(nFrames, 2));                
                 tflip = Screen('Flip', wp);
-                cclabPulse('B');
+
+                % only put out this trigger on b-w trans
+                if mod(nFrames, 2)
+                    cclabPulse('B', pulseWidth);
+                end
                 nFrames = nFrames + 1;
                 if nFrames == maxStimFrames
                     state = "DONE";
