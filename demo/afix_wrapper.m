@@ -1,5 +1,5 @@
 % initializations - per "rig"
-cfg.screen_number = 2;
+cfg.screen_number = 1;
 
 % mac
 % cfg.screen_rect = [1280 750 1680 1050];
@@ -20,6 +20,7 @@ cfg.reward_gap = 250;
 
 % eye tracker config (TODO)
 cfg.eyelink_dummymode = 1;
+cfg.doBitsPlusPlus = 0;
 
 % size of photodiode square, in pixels 
 cfg.marker_rect = [0, 0, 200, 200];
