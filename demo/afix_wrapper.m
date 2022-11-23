@@ -50,13 +50,5 @@ cfg.screen_resolution = [1920, 1080];
 cfg.ppdX = cfg.screen_resolution(1)/atan(0.5*cfg.screen_visible_mm(1)/cfg.screen_distance_mm)*pi/180;
 cfg.ppdY = cfg.screen_resolution(2)/atan(0.5*cfg.screen_visible_mm(2)/cfg.screen_distance_mm)*pi/180;
 
-% use this to draw a fixpt (with CenterRectAtPoint)
-cfg.fixpt_rect = [0, 0, cfg.ppdX*cfg.fixpt_diameter_deg, cfg.ppdY*cfg.fixpt_diameter_deg];
-
-% Use this to define a rect (using CenterRectAtPoint) to use with
-% IsInRect() when testing eye position
-cfg.fixation_window_rect = [0, 0, cfg.fixpt_diameter_deg * cfg.ppdX, cfg.fixpt_diameter_deg * cfg.ppdY];
-
-
 %afix(cfg);
 bfix(cfg);

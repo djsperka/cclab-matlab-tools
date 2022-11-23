@@ -19,7 +19,21 @@ function [] = bfix(cfg)
         [wp, wrect] = BitsPlusPlus('OpenWindowColor++', cfg.screen_number, cfg.background_color, cfg.screen_rect);
         BitsPlusPlus('DIOCommand', wp, -1, 0, 255, trigData, 0, 1, 2);
     else
-        [wp, wrect] = Screen('OpenWindow', cfg.screen_number, 255*cfg.background_color, cfg.screen_rect);
+
+        % Thank you for this section: https://www.jennyreadresearch.com/research/lab-set-up/datapixx/
+        AssertOpenGL;
+        % Configure PsychToolbox imaging pipeline to use 32-bit floating point numbers.
+        % Our pipeline will also implement an inverse gamma mapping to correct for display gamma.
+        PsychImaging('PrepareConfiguration');
+        PsychImaging('AddTask', 'General', 'FloatingPoint32Bit');
+        PsychImaging('AddTask', 'FinalFormatting', 'DisplayColorCorrection', 'SimpleGamma');
+        %oldVerbosity = Screen('Preference', 'Verbosity', 1); % Don%t log the GL stuff
+        [wp, wrect] = PsychImaging('OpenWindow', cfg.screen_number, 255 * cfg.background_color);
+        %Screen('Preference', 'Verbosity', oldVerbosity);
+
+
+
+        % old [wp, wrect] = Screen('OpenWindow', cfg.screen_number, 255*cfg.background_color, cfg.screen_rect);
     end
     trigData = zeros(1, 248);
     trigData(1, 1:10) = 32768;
@@ -90,14 +104,13 @@ function [] = bfix(cfg)
 
 end
 
+
 function [tflip] = drawScreenNoFlip(cfg, wp, x)
-    Screen('FillRect', wp, cfg.background_color);
+    Screen('FillRect', wp, 255*cfg.background_color);
     if ~isempty(x) && isscalar(x)
         % rect for drawing photodiode square
         % 'center', 'left', 'right', 'top', and 'bottom'. 
         r=AlignRect(cfg.marker_rect ,cfg.window_rect, cfg.marker_rect_side1, cfg.marker_rect_side2);
-        %marker_rect_pos = [cfg.screen_resolution(1)-cfg.marker_rect(3), cfg.screen_resolution(2)-cfg.marker_rect(4), cfg.screen_resolution(1), cfg.screen_resolution(2)];
-        %Screen('FillRect', wp, [x*255, x*255, x*255], r);
         Screen('FillRect', wp, [x, x, x], r);
     end
 end
