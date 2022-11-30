@@ -39,9 +39,9 @@ function [] = bfix(cfg)
     trigData(1, 1:10) = 32768;
     cfg.window_rect = wrect;
 
-    pauseSec = 0.25;
+    pauseSec = 0.1;
     pulseWidth = 0.1; % ms
-    maxStimFrames = 800;
+    maxStimFrames = 1000;
     stimLoopFrames = 4;
     bQuit = 0;
     bGo = 0;
