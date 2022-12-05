@@ -39,6 +39,17 @@ cfg.output_folder='/Users/dan/Documents/MATLAB';
 cfg.verbose = 1;
 cfg.doBitsPlusPlus = 0;
 
+% cfix-specific
+cfg.dummymode = 1;
+
+
+
+
+
+
+
+
+
 
 % computed after initializations
 
@@ -51,4 +62,5 @@ cfg.ppdX = cfg.screen_resolution(1)/atan(0.5*cfg.screen_visible_mm(1)/cfg.screen
 cfg.ppdY = cfg.screen_resolution(2)/atan(0.5*cfg.screen_visible_mm(2)/cfg.screen_distance_mm)*pi/180;
 
 %afix(cfg);
-bfix(cfg);
+%bfix(cfg);
+cfix(cfg);
