@@ -40,7 +40,7 @@ cfg.verbose = 1;
 cfg.doBitsPlusPlus = 0;
 
 % cfix-specific
-cfg.dummymode = 1;
+cfg.dummymode = 0;
 
 
 
@@ -63,4 +63,4 @@ cfg.ppdY = cfg.screen_resolution(2)/atan(0.5*cfg.screen_visible_mm(2)/cfg.screen
 
 %afix(cfg);
 %bfix(cfg);
-cfix(cfg);
+times = cfix(cfg);
