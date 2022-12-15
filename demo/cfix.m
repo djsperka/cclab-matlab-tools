@@ -34,7 +34,16 @@ function [times] = cfix(cfg)
 
 
     % eyelink
-    el = myEyelinkInit(cfg, wp, 'aaa010');
+    % Get EyeLink default settings, make some updates. Note call to EyelinkUpdateDefauilts()
+    el = EyelinkInitDefaults(wp);
+    el.calibrationtargetsize = 5;% Outer target size as percentage of the screen
+    el.calibrationtargetwidth = 0;% Inner target size as percentage of the screen
+    el.backgroundcolour = [128 128 128];% RGB grey
+    el.calibrationtargetcolour = [0 0 1];% RGB black
+    el.msgfontcolour = [0 0 1];% RGB black
+    EyelinkUpdateDefaults(el);
+
+    myEyelinkInit(cfg, wp, 'aaa010');
 
 
 
@@ -154,7 +163,7 @@ function [] = mylogger(cfg, str)
     end
 end
 
-function [el] = myEyelinkInit(cfg, wp, filename)
+function [] = myEyelinkInit(cfg, wp, filename)
 %   try all this eyelink stuff
     EyelinkInit(cfg.dummymode); % Initialize EyeLink connection
     status = Eyelink('IsConnected');
@@ -175,6 +184,7 @@ function [el] = myEyelinkInit(cfg, wp, filename)
     end
 
 %   Open EDF file
+%   TODO: What happens when in dummy mode? Make sure this doesn't crash. 
     failOpen = Eyelink('OpenFile', filename);
     if failOpen
         error('Cannot create EDF file %s', filename);
@@ -196,14 +206,6 @@ function [el] = myEyelinkInit(cfg, wp, filename)
 
     % BOILERPLATE CONFIG - HIDE THIS IN FINAL.INI OR ELSEWHERE? 
 
-    % Get EyeLink default settings, make some updates. Note call to EyelinkUpdateDefauilts()
-    el = EyelinkInitDefaults(wp);
-    el.calibrationtargetsize = 5;% Outer target size as percentage of the screen
-    el.calibrationtargetwidth = 0;% Inner target size as percentage of the screen
-    el.backgroundcolour = [128 128 128];% RGB grey
-    el.calibrationtargetcolour = [0 0 1];% RGB black
-    el.msgfontcolour = [0 0 1];% RGB black
-    EyelinkUpdateDefaults(el);
 
     % SCREEN physical size of viewing area and dist to eye
     Eyelink('Command','screen_phys_coords = -240.0 132.5 240.0 -132.5 ');
