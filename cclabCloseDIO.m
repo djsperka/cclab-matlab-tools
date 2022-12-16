@@ -1,17 +1,19 @@
 function cclabCloseDIO()
-%cclabCloseReward Releases daq resources, and removes global var from
-%workspace
-%   After done using the reward system, call this to release resources.
-%   Not strictly required because cclabInitReward will recognize that its
-%   already initialized and ready, so you can call init after crashed
-%   script, e.g., and it won't complain. 
+%cclabCloseDIO Releases all daq resources, and removes global var from
+%workspace.
+%   Call this to release all resources used for digital IO system (in other
+%   words, call this at the end of your script if you called cclabInitDIO
+%   elsewhere in your script. Calling this function multiple times is not
+%   harmful. 
 
+
+%   clean up reward system parts of dio
     cclabCloseReward();
 
+%   Now clean up pulse channels. Have to re-declare g_dio and see if its
+%   empty or not, then clear it again. 
     global g_dio;
     if ~isempty(g_dio)
-        % spinlock stop(g_dio.daqClock);
-        % spinlock g_dio.daqClock = [];
         g_dio.daqAB = [];
     end
     clear global g_dio;

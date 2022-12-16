@@ -4,9 +4,9 @@ function [] = cclabInitDIO(types)
 % 'types' is a string of channels to be configured. There is a reward 
 % channel, which you should specify with either "j" or "n" ("n" gives a 
 % dummy channel - use this when working on a machine other than the rig.
-% 'types' can also include "A" or "B". These two channels are for output 
-% pulses - call cclabPulse("A"), e.g.
-% 
+% TODO: As currently configured, two DIO channels are automatically 
+% set up, or at least its attempted, but this function will fail if run
+% without a working NI PCIe-6351. 
 
     rewardRate = 5000;
     abRate = 1000000;
@@ -55,49 +55,30 @@ function [] = cclabInitDIO(types)
         end
     end
 
-
-%     % Now pulse channels - set up automatically
-%     % Do not require AB in types string.
-% 
-%     if isempty(g_dio) || ~isfield(g_dio, 'daqClock')
-%     
-%         % WARNING! Assuming that there is a single daq device, and that the
-%         % first one is the ni PCIe-6351. If that changes, or if another card is
-%         % added to the machine, this will something more clever. djs
-%         daqs = daqlist();
-%     
-%         if strcmp(daqs.Model(1), "PCIe-6351")
-%             % create daq object, populate it
-%             g_dio.daqClock = daq("ni");
-%             addoutput(g_dio.daqClock, "Dev1", "ctr0", "PulseGeneration");
-%             g_dio.daqClock.Channels(1).Frequency=abRate;
-%             g_dio.daqClock.Rate = abRate;
-%             start(g_dio.daqClock, "Continuous");
-%         else
-%             error("cclabInitDIO: Cannot find ni PCIe-6351");
-%         end
-% 
-%     end
-% 
-
-% will do spinlock, so no clock.
+    % will do spinlock, so no clock.
     if isempty(g_dio) || ~isfield(g_dio, 'daqAB')
-    
-        % WARNING! Assuming that there is a single daq device, and that the
-        % first one is the ni PCIe-6351. If that changes, or if another card is
-        % added to the machine, this will something more clever. djs
-        daqs = daqlist();
-    
-        if strcmp(daqs.Model(1), "PCIe-6351")
-            % create daq object, populate it
-            g_dio.daqAB = daq("ni");
-            addoutput(g_dio.daqAB, "Dev1", "port0/line4", "Digital"); % A
-            addoutput(g_dio.daqAB, "Dev1", "port0/line3", "Digital"); % B
-            %terminal = g_dio.daqClock.Channels(1).Terminal;
-            %addclock(g_dio.daqAB, "ScanClock", "External", strcat('Dev1/', terminal));
-            g_dio.daqAB.Rate=abRate;
+
+        % Now do pulse channels - check for "A" or "B".
+        if contains(types, 'A') || contains(types, 'B')
+        
+            % WARNING! Assuming that there is a single daq device, and that the
+            % first one is the ni PCIe-6351. If that changes, or if another card is
+            % added to the machine, this will something more clever. djs
+            daqs = daqlist();
+        
+            if strcmp(daqs.Model(1), "PCIe-6351")
+                % create daq object, populate it
+                g_dio.daqAB = daq("ni");
+                addoutput(g_dio.daqAB, "Dev1", "port0/line4", "Digital"); % A
+                addoutput(g_dio.daqAB, "Dev1", "port0/line3", "Digital"); % B
+                %terminal = g_dio.daqClock.Channels(1).Terminal;
+                %addclock(g_dio.daqAB, "ScanClock", "External", strcat('Dev1/', terminal));
+                g_dio.daqAB.Rate=abRate;
+            else
+                error("cclabInitDIO: Cannot find ni PCIe-6351");
+            end
         else
-            error("cclabInitDIO: Cannot find ni PCIe-6351");
+            g_dio.daqAB='DUMMY';
         end
     end
 end

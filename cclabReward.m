@@ -1,6 +1,8 @@
 function [success, s] = cclabReward(varargin)
-%cclabReward(msec, n=1, gap=50) Deliver reward, open valve for msec milliseconds, n times, with 'gap' ms between.
-%   This is an async function, it may return before reward is done.
+%cclabReward(msec, n=1, gap=50) Deliver reward, open valve for 'msec' 
+% milliseconds, n times, with 'gap' ms between rewards. 
+%   This is a synchronous function, it will block Matlab until reward is 
+%   done. Call cclabInitDIO before calling this. 
     s = [];
     success = 0;
     if ~cclabRewardIsReady()
