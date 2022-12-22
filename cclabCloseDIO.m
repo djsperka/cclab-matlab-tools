@@ -8,7 +8,7 @@ function cclabCloseDIO()
 
 
 %   clean up reward system parts of dio
-    cclabCloseReward();
+%    cclabCloseReward();
 
 %   Now clean up pulse channels. Have to re-declare g_dio and see if its
 %   empty or not, then clear it again. 
