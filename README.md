@@ -29,6 +29,12 @@ These functions assume you have a NIZZZZZZ card. This is easily modified, provid
     A global struct *g_dio* is created in your workspace, which the other toolbox functions will access. Do not modify the contents of this struct. The struct is removed (and all resources released) when you call *cclabCloseDIO()*.
  
  
- > **cclabReward(*rewardMS, count=1, gapMS=50*)**
+ > **cclabReward(*msec*, *n*=1, *gap*=50*)**
 
-    Issue reward of sizeMS millisecons. If count>1, then count rewards are delivered, with capMS milliseconds between each. This function is synchronous - it will not return until the reward has been fully delivered. 
+    Deliver reward, open valve for 'msec' milliseconds, n times, with 'gap' ms between rewards.
+    This is a synchronous function, it will block Matlab until reward is done. Must call cclabInitDIO before calling this function. 
+
+> **cclabPulse(*which*, *width*=1, *gap*=50*)**
+
+    Deliver reward, open valve for 'msec' milliseconds, n times, with 'gap' ms between rewards.
+    This is a synchronous function, it will block Matlab until reward is done. Must call cclabInitDIO before calling this function. 
