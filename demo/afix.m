@@ -17,7 +17,7 @@ function [] = afix(cfg)
     end
 
     % juicer
-    cclabInitReward(cfg.reward_type);
+    cclabInitDIO(cfg.reward_type);
 
     [center_x_pix, center_y_pix] = RectCenter(wrect);
 

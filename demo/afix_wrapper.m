@@ -23,6 +23,15 @@ cfg.eyelink_dummymode = 1;
 cfg.doBitsPlusPlus = 0;
 cfg.SkipSyncTests = 1;
 
+% 
+cfg.fixpt_pos_deg = [0, 0];
+cfg.fixation_color = [150, 120, 10];
+cfg.fixpt_rect = [0 0 20 20];
+cfg.max_acquisition_time = 2;
+cfg.fixation_window_rect = [0 0 100 100];
+cfg.intertrial_time = 1;
+cfg.fixation_time = 1;
+
 % size of photodiode square, in pixels 
 cfg.marker_rect = [0, 0, 200, 200];
 
@@ -32,7 +41,7 @@ cfg.marker_rect_side2 = 'right';
 
 % initializations - experimental parameters
 % colors  [0,1] not [0 255]
-cfg.background_color=[.5, .5, .5];
+cfg.background_color=[100, 100, 100];
 cfg.output_folder='/Users/dan/Documents/MATLAB';
 
 % other
@@ -61,6 +70,6 @@ cfg.screen_resolution = [1920, 1080];
 cfg.ppdX = cfg.screen_resolution(1)/atan(0.5*cfg.screen_visible_mm(1)/cfg.screen_distance_mm)*pi/180;
 cfg.ppdY = cfg.screen_resolution(2)/atan(0.5*cfg.screen_visible_mm(2)/cfg.screen_distance_mm)*pi/180;
 
-%afix(cfg);
+afix(cfg);
 %bfix(cfg);
-times = cfix(cfg);
+%times = cfix(cfg);

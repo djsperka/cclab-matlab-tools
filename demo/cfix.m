@@ -2,6 +2,13 @@ function [times] = cfix(cfg)
 %afix Summary of this function goes here
 %   Detailed explanation goes here
 
+    % docs say this call with (2) arg does the following:
+    % AssertOpenGL();
+    % KbName('UnifyKeyNames');
+    % It also says that any time Screen('OpenWindow'....) is called, that 
+    % the following call is implied:
+    % Screen('ColorRange', window, 1, [], 1);
+    PsychDefaultSetup(2);
 
     % Init dio, no reward
     cclabInitDIO('AB');
