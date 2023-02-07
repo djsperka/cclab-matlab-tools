@@ -19,7 +19,7 @@ white = WhiteIndex(screenNumber);
 grey = white / 2;
 
 % Open an on screen window and color it grey
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, grey, [0 0 400 300]);
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber, grey, []);
 
 % Set the blend funciton for the screen
 Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
