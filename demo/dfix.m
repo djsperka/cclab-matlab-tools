@@ -87,7 +87,6 @@ function [] = myEyelinkInit(cfg, filename)
             ME = MException('Eyelink connection failed.');
             throw(ME);
         else
-            fprintf('Eyelink (%s) is connected.\n', versionstring);
 
         %   Open EDF file
             failOpen = Eyelink('OpenFile', filename);
@@ -133,7 +132,12 @@ function [] = myEyelinkInit(cfg, filename)
             % commands. Convenient to use screen_pixel_coords here.
             Eyelink('Message', 'DISPLAY_COORDS %ld %ld %ld %ld', 0, 0, RectWidth(cfg.wrect)-1, RectHeight(cfg.wrect)-1);
         
-            % END BOILERPLATE CONFIG STUFF HERE
+            % End of initialization, enter setup.
+            fprintf('Eyelink (%s) is connected.\n', versionstring);
+            fprintf('Entering Eyelink setup...\n');
+            EyelinkDoTrackerSetup(el);
+            fprintf('Exiting setup...\n');
+
         end
     end
 end
