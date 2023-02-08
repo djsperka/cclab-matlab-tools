@@ -19,7 +19,7 @@ function [times] = dfix(cfg)
     
         % Open window
         Screen('Preference', 'SkipSyncTests', cfg.SkipSyncTests);
-        [cfg.wp, cfg.wrect] = Screen('OpenWindow', cfg.screen_number, cfg.screen_rect);
+        [cfg.wp, cfg.wrect] = Screen('OpenWindow', cfg.screen_number, cfg.background_color, cfg.screen_rect);
     
     
         % eyelink    
