@@ -2,9 +2,9 @@
 
 Assume you have working Matlab and PTB,  as this relies on the PsychHID functions, and will only work on linux. 
 
-### Xorg conf file
+### Install the Xorg conf file
 
-*(Assuming you are running Ubuntu 20.04, should work with variants)* 
+*(Assuming you are running Ubuntu 20.04, should work with debian variants)* 
 
 Copy the file *99-millikey-float.conf* file to the folder **/usr/share/X11/xorg.conf.d/**
 
@@ -37,12 +37,48 @@ dan@bucky:~/work/cclab/cclab-matlab-tools$ xinput -list
 
 Once the MilliKey device is plugged in, you can use it in Matlab as follows. 
 
-1. Get the device index. 
+1. Get the device index. This will be the 'device index' parameter passed to the **KbXXX()** functions. Note that it is a different value than the 'id' from *xinput*. 
 
-```
->> ind = cclabGetMilliKeyIndices()
+    ```
+    >> ind = cclabGetMilliKeyIndices()
+    
+        ind =
+       
+         9
+    ```
 
-ind =
+2. Create a queue. There is no return value. Functions that access and control the queue use the device index. 
 
-     9
-```
+    ```
+    >> PsychHID('KbQueueCreate', ind);
+    ```
+
+3. Start the queue. Once the queue is started, any keypresses will be captured and saved in the queue until it is flushed.
+
+    ```
+    >> PsychHID('KbQueueCreate', ind);
+    ```
+
+4. Stop the queue. Eventually you should stop the queue. New events will not be added to the queue, but the contents of the queue when this is called are left untouched. 
+
+    ```
+    >> PsychHID('KbQueueCreate', ind);
+    ```
+
+### Getting events from the queue
+
+    Each keypress and key*release* are recorded as events. The event type (keypress or release), time (consistent with GetSecs() clock), which key was pressed/released, are all part of the event structure. A simple way to iterate over all *available* events is shown below. Each keypress is registered as two consecutive events, one when the key is *pressed*, and another when the key is *released* (when event.Pressed is 0).
+
+    ```
+       while KbEventAvail(ind)
+           [event, nremaining] = KbEventGet(ind);
+           if event.Pressed
+               t1 =  event.Time;
+           else
+               t2 = event.Time;
+               fprintf('keycode %d, down %f\n', event.Keycode, t2-t1);
+           end
+       end
+    
+    ```
+    
