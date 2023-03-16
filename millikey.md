@@ -67,18 +67,20 @@ Once the MilliKey device is plugged in, you can use it in Matlab as follows.
 
 ### Getting events from the queue
 
-    Each keypress and key*release* are recorded as events. The event type (keypress or release), time (consistent with GetSecs() clock), which key was pressed/released, are all part of the event structure. A simple way to iterate over all *available* events is shown below. Each keypress is registered as two consecutive events, one when the key is *pressed*, and another when the key is *released* (when event.Pressed is 0).
+Each keypress and key*release* are recorded as events. The event type (keypress or release), time (consistent with GetSecs() clock), which key was pressed/released, are all part of the event structure. Each keypress is registered as two consecutive events, one when the key is *pressed*, and another when the key is *released* (when event.Pressed is 0).
 
-    ```
-       while KbEventAvail(ind)
-           [event, nremaining] = KbEventGet(ind);
-           if event.Pressed
-               t1 =  event.Time;
-           else
-               t2 = event.Time;
-               fprintf('keycode %d, down %f\n', event.Keycode, t2-t1);
-           end
+A simple way to iterate over all *available* events is shown below. The queue can be queried for events even if it is running! 
+
+```
+   while KbEventAvail(ind)
+       [event, nremaining] = KbEventGet(ind);
+       if event.Pressed
+           t1 =  event.Time;
+       else
+           t2 = event.Time;
+           fprintf('keycode %d, down %f\n', event.Keycode, t2-t1);
        end
-    
-    ```
+   end
+
+```
     
