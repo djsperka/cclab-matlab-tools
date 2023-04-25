@@ -71,6 +71,10 @@ function [] = cclabInitDIO(types)
                 g_dio.daqAB = daq("ni");
                 addoutput(g_dio.daqAB, "Dev1", "port0/line4", "Digital"); % A
                 addoutput(g_dio.daqAB, "Dev1", "port0/line3", "Digital"); % B
+                addoutput(g_dio.daqAB, "Dev1", "port0/line5", "Digital"); % C
+                addoutput(g_dio.daqAB, "Dev1", "port0/line6", "Digital"); % D
+                addoutput(g_dio.daqAB, "Dev1", "port0/line7", "Digital"); % E
+                addoutput(g_dio.daqAB, "Dev1", "port1/line0", "Digital"); % F
                 %terminal = g_dio.daqClock.Channels(1).Terminal;
                 %addclock(g_dio.daqAB, "ScanClock", "External", strcat('Dev1/', terminal));
                 g_dio.daqAB.Rate=abRate;
