@@ -42,24 +42,12 @@ function [success, s] = cclabReward(varargin)
             %fprintf('cclabReward(): running? %d, preload length %d, time since last reward %f\n', g_dio.reward.daq.Running, length(s), toc(g_dio.reward.tic));
             if g_dio.reward.daq.Running
                 fprintf('Warning - Previous reward scan is running, time since is %f!\n', toc(g_dio.reward.tic));
-                %g_dio.reward.daq
             else
                 g_dio.reward.tic = tic;
-%                 preload(g_dio.reward.daq, s);
-                %start(g_dio.reward.daq);
                 write(g_dio.reward.daq, s);
             end
 
-%             z=0;
-%             while z<10 && g_dio.reward.daq.Running
-%                 z = z+1;
-%                 fprintf('waiting... pause .2s %d, time since %f\n', z, toc(g_dio.reward.tic));
-%                 g_dio.reward.daq
-%                 pause(.1);
-%             end
-
-    
-            %TODO we don't really know this, but let's declare success!
+            %let's declare success!
             success = 1;
 
         elseif g_dio.reward.type == "n"
