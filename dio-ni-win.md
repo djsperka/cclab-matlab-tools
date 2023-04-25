@@ -1,10 +1,10 @@
 ## CCLab NI Reward system
 
-We initially set up the PTB machine using the NI ZZZZ card. We chose to use Matlab daq toolbox, which is only supported on Windows. 
+We initially set up the PTB machine using the **NI PCIe-6351** card. We chose to use Matlab daq toolbox, which is only supported on Windows. 
 
 These functions allow you to use the NiDAQ card to control the reward system, and also to generate TTL signals for synchronization.
 
-These functions assume you have a NIZZZZZZ card. This is easily modified, provided matlab's DAQToolbox supports it (see cclabInitDIO.m). You can also use these functions without any DIO card - see cclabInitDIO() below. 
+The configuration in *cclabInitDIO* assume you have a  **NI PCIe-6351** card, and that NI drivers present it as "Dev2". This is easily modified, provided matlab's DAQToolbox supports it (see cclabInitDIO.m). You can also use these functions without any DIO card - see cclabInitDIO() below. 
 
 Typical usage looks like this:
 
@@ -60,7 +60,7 @@ A global struct *g_dio* is created in your workspace, which the other toolbox fu
 
 ### **cclabPulse(*which*, *width*=1)**
 
-    Output TTL pulses on a dig output line(s). Must call cclabInitDIO before calling this function.  
+    Output TTL pulses on a dig output line(s). Must call cclabInitDIO before calling this function. *which* can be any of 'ABCDE'. The BNC connectors are labelled with these letters. Multiple lines can be pulsed simultaneously. Note that this is a blocking function -- only a single call to *cclabPulse* can be active at one time. 
     
     *cclabPulse('A');* - output a single 1ms pulse on dig output line 'A'. 
     *cclabPulse('B', 0.1)* - output a single pulse of width 0.1ms on line 'B'
