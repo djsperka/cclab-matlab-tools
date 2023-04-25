@@ -24,8 +24,8 @@ function [success, sample] = cclabPulse(varargin)
            'This function expects 1-2 inputs.');
         end
 
-        % 4/24/2023 djs: There are now 6 lines, 'A'-'F'
-        sample = zeros(1, 6);
+        % 4/24/2023 djs: There are now 5 lines, 'A'-'E'
+        sample = zeros(1, 5);
         clear = sample;         % bring all lines low at end of pulse
         if contains(channel, 'A')
             sample(1) = 1;
@@ -41,9 +41,6 @@ function [success, sample] = cclabPulse(varargin)
         end
         if contains(channel, 'E')
             sample(5) = 1;
-        end
-        if contains(channel, 'F')
-            sample(6) = 1;
         end
 
         % spinlock implementation here, using WaitSecs

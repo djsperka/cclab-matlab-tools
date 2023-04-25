@@ -30,7 +30,10 @@ function [] = cclabInitDIO(types)
                     g_dio.reward.type = "j";
                     g_dio.reward.daq = daq("ni");
                     g_dio.reward.daq.Rate = rewardRate;
-                    addoutput(g_dio.reward.daq, "Dev1", "ao0", "Voltage");
+                    % djs HARD-CODING "Dev2" here. This was "Dev1",
+                    % hardware change made this "Dev2". Can be more robust
+                    % - TODO. 
+                    addoutput(g_dio.reward.daq, "Dev2", "ao0", "Voltage");
                     success = 1;
                 else
                     error("cclabInitReward: Cannot find ni PCIe-6351");
@@ -69,12 +72,13 @@ function [] = cclabInitDIO(types)
             if strcmp(daqs.Model(1), "PCIe-6351")
                 % create daq object, populate it
                 g_dio.daqAB = daq("ni");
-                addoutput(g_dio.daqAB, "Dev1", "port0/line4", "Digital"); % A
-                addoutput(g_dio.daqAB, "Dev1", "port0/line3", "Digital"); % B
-                addoutput(g_dio.daqAB, "Dev1", "port0/line5", "Digital"); % C
-                addoutput(g_dio.daqAB, "Dev1", "port0/line6", "Digital"); % D
-                addoutput(g_dio.daqAB, "Dev1", "port0/line7", "Digital"); % E
-                addoutput(g_dio.daqAB, "Dev1", "port1/line0", "Digital"); % F
+                addoutput(g_dio.daqAB, "Dev2", "port0/line4", "Digital"); % A
+                addoutput(g_dio.daqAB, "Dev2", "port0/line3", "Digital"); % B
+                addoutput(g_dio.daqAB, "Dev2", "port0/line5", "Digital"); % C
+                addoutput(g_dio.daqAB, "Dev2", "port0/line6", "Digital"); % D
+                addoutput(g_dio.daqAB, "Dev2", "port0/line7", "Digital"); % E
+                %clocked operations are not supported on port 1.
+                % addoutput(g_dio.daqAB, "Dev2", "port1/line0", "Digital"); % F
                 %terminal = g_dio.daqClock.Channels(1).Terminal;
                 %addclock(g_dio.daqAB, "ScanClock", "External", strcat('Dev1/', terminal));
                 g_dio.daqAB.Rate=abRate;
