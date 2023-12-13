@@ -12,6 +12,21 @@ function [] = cclabInitDIO(types)
     abRate = 1000000;
     global g_dio;
     
+
+    % find device id. We assume that the device is an NI pcie-6351. This
+    % would be easy to change, but this is the only device in town, so
+    % that's what we're going with. 
+
+    daqs = daqlist();
+    devID='None';
+    for i=1:size(daqs, 1)  
+        if strcmp(daqs(i, :).Model, "PCIe-6351")
+            devID = daqs(i, :).DeviceID;
+            break;
+        end
+    end
+    fprintf('found DeviceID %s\n', devID);
+
     % First - check for "j" or "n", and then deal with the reward setup.
     if contains(types, 'j') || contains(types, 'n')
     
@@ -22,22 +37,12 @@ function [] = cclabInitDIO(types)
             % first one is the ni PCIe-6351. If that changes, or if another card is
             % added to the machine, this will something more clever. djs
             if contains(types, 'j')
-                % enumerate daq devices, according to daq toolbox...
-                daqs = daqlist();
-        
-                if strcmp(daqs.Model(1), "PCIe-6351")
-                    % create daq object, populate it
-                    g_dio.reward.type = "j";
-                    g_dio.reward.daq = daq("ni");
-                    g_dio.reward.daq.Rate = rewardRate;
-                    % djs HARD-CODING "Dev2" here. This was "Dev1",
-                    % hardware change made this "Dev2". Can be more robust
-                    % - TODO. 
-                    addoutput(g_dio.reward.daq, "Dev2", "ao0", "Voltage");
-                    success = 1;
-                else
-                    error("cclabInitReward: Cannot find ni PCIe-6351");
-                end
+                % create daq object, populate it
+                g_dio.reward.type = "j";
+                g_dio.reward.daq = daq("ni");
+                g_dio.reward.daq.Rate = rewardRate;
+                addoutput(g_dio.reward.daq, devID, "ao0", "Voltage");
+                success = 1;
             elseif contains(types, 'n')
                 g_dio.reward.type = "n";
                 g_dio.reward.daq = [];
@@ -64,27 +69,14 @@ function [] = cclabInitDIO(types)
         % Now do pulse channels - check for "A" or "B".
         if contains(types, 'A') || contains(types, 'B')
         
-            % WARNING! Assuming that there is a single daq device, and that the
-            % first one is the ni PCIe-6351. If that changes, or if another card is
-            % added to the machine, this will something more clever. djs
-            daqs = daqlist();
-        
-            if strcmp(daqs.Model(1), "PCIe-6351")
-                % create daq object, populate it
-                g_dio.daqAB = daq("ni");
-                addoutput(g_dio.daqAB, "Dev2", "port0/line4", "Digital"); % A
-                addoutput(g_dio.daqAB, "Dev2", "port0/line3", "Digital"); % B
-                addoutput(g_dio.daqAB, "Dev2", "port0/line5", "Digital"); % C
-                addoutput(g_dio.daqAB, "Dev2", "port0/line6", "Digital"); % D
-                addoutput(g_dio.daqAB, "Dev2", "port0/line7", "Digital"); % E
-                %clocked operations are not supported on port 1.
-                % addoutput(g_dio.daqAB, "Dev2", "port1/line0", "Digital"); % F
-                %terminal = g_dio.daqClock.Channels(1).Terminal;
-                %addclock(g_dio.daqAB, "ScanClock", "External", strcat('Dev1/', terminal));
-                g_dio.daqAB.Rate=abRate;
-            else
-                error("cclabInitDIO: Cannot find ni PCIe-6351");
-            end
+            % create daq object, populate it
+            g_dio.daqAB = daq("ni");
+            addoutput(g_dio.daqAB, devID, "port0/line4", "Digital"); % A
+            addoutput(g_dio.daqAB, devID, "port0/line3", "Digital"); % B
+            addoutput(g_dio.daqAB, devID, "port0/line5", "Digital"); % C
+            addoutput(g_dio.daqAB, devID, "port0/line6", "Digital"); % D
+            addoutput(g_dio.daqAB, devID, "port0/line7", "Digital"); % E
+            g_dio.daqAB.Rate=abRate;
         else
             g_dio.daqAB='DUMMY';
         end
