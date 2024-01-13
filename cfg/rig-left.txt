@@ -1,0 +1,7 @@
+j	reward	ni	
+A	digout	ni	port0/line4
+B	digout	ni	port0/line3
+C	digout	ni	port0/line5
+D	digout	ni	port0/line7
+H	joystick	ni	ai0
+V	joystick	ni	ai1

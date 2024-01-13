@@ -1,84 +1,135 @@
-function [] = cclabInitDIO(types)
-
+function [] = cclabInitDIO(varargin)
 %cclabInitDIO Initialize DIO channels on rig.
-% 'types' is a string of channels to be configured. There is a reward 
-% channel, which you should specify with either "j" or "n" ("n" gives a 
-% dummy channel - use this when working on a machine other than the rig.
-% TODO: As currently configured, two DIO channels are automatically 
-% set up, or at least its attempted, but this function will fail if run
-% without a working NI PCIe-6351. 
+% Input arg can be a config filename. The old letters, e.g. "jAB" will be
+% accepted as well, but given the default rig configuration - that is the
+% config for the right rig. 
+
 
     rewardRate = 5000;
     abRate = 1000000;
+    joyRate = 1000;
+
+
+    cclabCloseDIO();
     global g_dio;
-    
+    g_dio.reward = [];
+    g_dio.digout = [];
+    g_dio.digout.codes = '';
+    g_dio.joystick = [];
+    g_dio.joystick.codes = '';
+
+    % load configuration
+    cConfig = cclabLoadIOConfig(varargin{1});
 
     % find device id. We assume that the device is an NI pcie-6351. This
     % would be easy to change, but this is the only device in town, so
     % that's what we're going with. 
-
-    daqs = daqlist();
-    devID='None';
-    for i=1:size(daqs, 1)  
-        if strcmp(daqs(i, :).Model, "PCIe-6351")
-            devID = daqs(i, :).DeviceID;
-            break;
-        end
-    end
-    fprintf('found DeviceID %s\n', devID);
-
-    % First - check for "j" or "n", and then deal with the reward setup.
-    if contains(types, 'j') || contains(types, 'n')
-    
-        % g_dio.reward is not empty if it was init'd elsewhere
-        if isempty(g_dio) || ~isfield(g_dio, 'reward')
-        
-            % WARNING! Assuming that there is a single daq device, and that the
-            % first one is the ni PCIe-6351. If that changes, or if another card is
-            % added to the machine, this will something more clever. djs
-            if contains(types, 'j')
-                % create daq object, populate it
-                g_dio.reward.type = "j";
-                g_dio.reward.daq = daq("ni");
-                g_dio.reward.daq.Rate = rewardRate;
-                addoutput(g_dio.reward.daq, devID, "ao0", "Voltage");
-                success = 1;
-            elseif contains(types, 'n')
-                g_dio.reward.type = "n";
-                g_dio.reward.daq = [];
-                success = 1;
-            else
-                error("Unrecognized reward type %s", rewtype);
-            end
-        elseif isfield(g_dio, 'reward')
-            if g_dio.reward.type == "j" && isa(g_dio.reward.daq, 'daq.interfaces.DataAcquisition')
-                fprintf('Found configured reward object using ni DAQ card.\n');
-                success = 1;
-            elseif g_dio.reward.type == "n"
-                fprintf('Found configured DUMMY reward object.\n');
-                success = 1;
-            else
-                error("g_reward found, unknown type: %s", g_dio.reward.type);
+    niDevID='None';
+    if any(contains(cConfig{3}, 'ni'))
+        daqs = daqlist();
+        for i=1:size(daqs, 1)  
+            if strcmp(daqs(i, :).Model, "PCIe-6351")
+                niDevID = daqs(i, :).DeviceID;
+                break;
             end
         end
+        fprintf('found DeviceID %s\n', niDevID);
     end
 
-    % will do spinlock, so no clock.
-    if isempty(g_dio) || ~isfield(g_dio, 'daqAB')
 
-        % Now do pulse channels - check for "A" or "B".
-        if contains(types, 'A') || contains(types, 'B')
-        
+    % reward
+
+    if any(contains(cConfig{2}, 'reward'))
+
+        ind = find(contains(cConfig{2}, 'reward'));
+        letter = cConfig{1}{ind};
+        porttype = cConfig{2}{ind};
+        thingy = cConfig{3}{ind};
+        portname = cConfig{4}{ind}; 
+
+        if contains(thingy, 'ni', 'IgnoreCase', true)
             % create daq object, populate it
-            g_dio.daqAB = daq("ni");
-            addoutput(g_dio.daqAB, devID, "port0/line4", "Digital"); % A
-            addoutput(g_dio.daqAB, devID, "port0/line3", "Digital"); % B
-            addoutput(g_dio.daqAB, devID, "port0/line5", "Digital"); % C
-            addoutput(g_dio.daqAB, devID, "port0/line6", "Digital"); % D
-            addoutput(g_dio.daqAB, devID, "port0/line7", "Digital"); % E
-            g_dio.daqAB.Rate=abRate;
+            g_dio.reward.type = "j";
+            g_dio.reward.daq = daq("ni");
+            g_dio.reward.daq.Rate = rewardRate;
+            addoutput(g_dio.reward.daq, niDevID, "ao0", "Voltage");
+            success = 1;
+        elseif contains(thingy, 'none', 'IgnoreCase', true)
+            g_dio.reward.type = "n";
+            g_dio.reward.daq = [];
+            success = 1;
         else
-            g_dio.daqAB='DUMMY';
+            error("Unrecognized j thingy (column 3) - check cfg file %s", thingy);
+        end
+    end     % end of dealing with 'j'
+
+
+    % digital output - porttype='digout'
+
+    if any(contains(cConfig{2}, 'digout'))
+
+        digoutInd = find(contains(cConfig{2}, 'digout'));
+        for ind = 1:length(digoutInd)
+            letter = cConfig{1}{digoutInd(ind)};
+            thingy = cConfig{3}{digoutInd(ind)};
+            portname = cConfig{4}{digoutInd(ind)};
+
+            % TODO this will have trouble if one mixes digout 'ni' and
+            % 'none', as the first time through the daq is created (or
+            % not). 
+            if contains(thingy, 'ni', 'IgnoreCase', true)
+                % create daq obj if not already created
+                if ~isfield(g_dio.digout, 'daq')
+                    g_dio.digout.daq = daq('ni');
+                    g_dio.digout.daq.Rate=abRate;
+                elseif isempty(g_dio.digout.daq)
+                    error('Cannot mix ''ni'' and ''none'' type io ports');
+                end
+                addoutput(g_dio.digout.daq, niDevID, portname, "Digital");
+                g_dio.digout.codes = strcat(g_dio.digout.codes, letter);
+            elseif contains(thingy, 'none', 'IgnoreCase', true)
+                if ~isfield(g_dio.digout, 'daq')
+                    g_dio.digout.daq = [];
+                elseif isa(g_dio.digout.daq, 'daq.interfaces.DataAcquisition')
+                    error('Cannot mix ''ni'' and ''none'' type io ports');
+                end
+                g_dio.digout.codes = strcat(g_dio.digout.codes, letter);                
+            end
+        end
+    end
+
+
+    % analog input - porttype='joystick'
+    
+    if any(contains(cConfig{2}, 'joystick'))
+
+        joystickInd = find(contains(cConfig{2}, 'joystick'));
+        for ind = 1:length(joystickInd)
+            letter = cConfig{1}{joystickInd(ind)};
+            thingy = cConfig{3}{joystickInd(ind)};
+            portname = cConfig{4}{joystickInd(ind)};
+
+            if contains(thingy, 'ni', 'IgnoreCase', true)
+                % create daq obj if not already created
+                if ~isfield(g_dio.joystick, 'daq')
+                    g_dio.joystick.daq = daq('ni');
+                    g_dio.joystick.daq.Rate=joyRate;
+                end
+                ch = addinput(g_dio.joystick.daq, niDevID, portname, "Voltage");
+                ch.Range = [-5, 5];
+                g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);
+            elseif contains(thingy, 'none', 'IgnoreCase', true)
+                g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);
+
+                if ~isfield(g_dio.joystick, 'daq')
+                    g_dio.joystick.daq = [];
+                elseif isa(g_dio.joystick.daq, 'daq.interfaces.DataAcquisition')
+                    error('Cannot mix ''ni'' and ''none'' type joystick ports');
+                end
+                g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);                
+
+            
+            end
         end
     end
 end
