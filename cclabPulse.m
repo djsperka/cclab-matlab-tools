@@ -46,9 +46,9 @@ function [success, sample] = cclabPulse(varargin)
         % spinlock implementation here, using WaitSecs
         % just a single pulse
 
-        write(g_dio.daqAB, sample);
+        write(g_dio.digout.daq, sample);
         WaitSecs(tPulseWidthMS / 1000);
-        write(g_dio.daqAB, clear);
+        write(g_dio.digout.daq, clear);
 
     end
 end
