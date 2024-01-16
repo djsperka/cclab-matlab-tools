@@ -30,19 +30,19 @@ function [cConfig] = cclabLoadIOConfig(varargin)
     cConfig = [];
     if isfile(filename)
         fid = fopen(filename);
-        cConfig = textscan(fid, "%s\t%s\t%s\t%s");
+        cConfig = textscan(fid, "%s\t%s\t%s\t%s\t%s\t%s");
         fprintf('loaded from passed filename %s\n', filename);
     elseif isfile(maybeBasenameFile)
         fid = fopen(maybeBasenameFile);
-        cConfig = textscan(fid, "%s\t%s\t%s\t%s");
+        cConfig = textscan(fid, "%s\t%s\t%s\t%s\t%s\t%s");
         fprintf('loaded from passed basename %s\n', maybeBasenameFile);
     elseif contains(filename, 'dummy', 'IgnoreCase', true)
         fid = fopen(dummyConfigFile);
-        cConfig = textscan(fid, "%s\t%s\t%s\t%s");
+        cConfig = textscan(fid, "%s\t%s\t%s\t%s\t%s\t%s");
         fprintf('loaded dummy config %s\n', dummyConfigFile);
     else
         fid = fopen(defaultConfigFile);
-        cConfig = textscan(fid, "%s\t%s\t%s\t%s");
+        cConfig = textscan(fid, "%s\t%s\t%s\t%s\t%s\t%s");
         fprintf('loaded default config %s\n', defaultConfigFile);
     end        
     fclose(fid);

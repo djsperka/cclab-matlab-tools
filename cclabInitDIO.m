@@ -103,11 +103,24 @@ function [] = cclabInitDIO(varargin)
     
     if any(contains(cConfig{2}, 'joystick'))
 
+        g_dio.joystick.cal = [];
         joystickInd = find(contains(cConfig{2}, 'joystick'));
         for ind = 1:length(joystickInd)
             letter = cConfig{1}{joystickInd(ind)};
             thingy = cConfig{3}{joystickInd(ind)};
             portname = cConfig{4}{joystickInd(ind)};
+            sleft = cConfig{5}{joystickInd(ind)};
+            sright = cConfig{6}{joystickInd(ind)};
+
+            if ~isempty(sleft) && ~isempty(sright) 
+                vleft = str2double(sleft);
+                vright = str2double(sright);
+            else
+                vleft = nan;
+                vright = nan;
+            end
+
+            g_dio.joystick.cal = vertcat(g_dio.joystick.cal, [vleft, vright]);
 
             if contains(thingy, 'ni', 'IgnoreCase', true)
                 % create daq obj if not already created
