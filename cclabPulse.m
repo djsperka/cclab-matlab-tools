@@ -43,12 +43,27 @@ function [success, sample] = cclabPulse(varargin)
             sample(5) = 1;
         end
 
-        % spinlock implementation here, using WaitSecs
-        % just a single pulse
 
-        write(g_dio.digout.daq, sample);
-        WaitSecs(tPulseWidthMS / 1000);
-        write(g_dio.digout.daq, clear);
+        % check whether we have a daq object or not. 
+        % I assume that the absence of a daq object means that this is a
+        % dummy implementation, and we just write to the screen.
+
+        if ~isempty(g_dio.digout.daq)
+
+            % spinlock implementation here, using WaitSecs
+            % just a single pulse
+    
+            write(g_dio.digout.daq, sample);
+            WaitSecs(tPulseWidthMS / 1000);
+            write(g_dio.digout.daq, clear);
+
+        else
+
+            fprintf('cclabPulse() dummy digout: ');
+            fprintf('%d', sample);
+            fprintf('\n');
+
+        end
 
     end
 end
