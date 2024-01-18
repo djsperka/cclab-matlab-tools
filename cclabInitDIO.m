@@ -12,10 +12,10 @@ function [] = cclabInitDIO(varargin)
 
     cclabCloseDIO();
     global g_dio;
-    g_dio.reward = [];
-    g_dio.digout = [];
+    g_dio.reward.daq = [];
+    g_dio.digout.daq = [];
     g_dio.digout.codes = '';
-    g_dio.joystick = [];
+    g_dio.joystick.daq = [];
     g_dio.joystick.codes = '';
 
     % load configuration
@@ -33,11 +33,17 @@ function [] = cclabInitDIO(varargin)
                 break;
             end
         end
-        fprintf('found DeviceID %s\n', niDevID);
+        if niDevID ~= 'None'
+            fprintf('NI device is present, DeviceID %s\n', niDevID);
+        else
+            fprintf('NI device not found!');
+        end
     end
 
 
-    % reward
+    % reward. Assumed that there is just one line with reward. A second
+    % reward line would just overwrite the first one, I think. We have just
+    % one reward system, so just one reward line, please. 
 
     if any(contains(cConfig{2}, 'reward'))
 
@@ -52,18 +58,25 @@ function [] = cclabInitDIO(varargin)
             g_dio.reward.type = "j";
             g_dio.reward.daq = daq("ni");
             g_dio.reward.daq.Rate = rewardRate;
-            addoutput(g_dio.reward.daq, niDevID, "ao0", "Voltage");
-            success = 1;
+            ch = addoutput(g_dio.reward.daq, niDevID, "ao0", "Voltage");
+            fprintf('Reward channel configured:\n');
+            %disp(ch);
         elseif contains(thingy, 'none', 'IgnoreCase', true)
             g_dio.reward.type = "n";
             g_dio.reward.daq = [];
-            success = 1;
+            fprintf('Reward channel configured in dummy mode.\n');
         else
             error("Unrecognized j thingy (column 3) - check cfg file %s", thingy);
         end
-    end     % end of dealing with 'j'
+    end
+
+    if ~isempty(g_dio.reward.daq)
+        fprintf('Reward daq channels:\n');
+        disp(g_dio.reward.daq.Channels);
+    end
 
 
+    
     % digital output - porttype='digout'
 
     if any(contains(cConfig{2}, 'digout'))
@@ -79,23 +92,26 @@ function [] = cclabInitDIO(varargin)
             % not). 
             if contains(thingy, 'ni', 'IgnoreCase', true)
                 % create daq obj if not already created
-                if ~isfield(g_dio.digout, 'daq')
+                if isempty(g_dio.digout.daq)
                     g_dio.digout.daq = daq('ni');
                     g_dio.digout.daq.Rate=abRate;
-                elseif isempty(g_dio.digout.daq)
-                    error('Cannot mix ''ni'' and ''none'' type io ports');
                 end
-                addoutput(g_dio.digout.daq, niDevID, portname, "Digital");
+                ch = addoutput(g_dio.digout.daq, niDevID, portname, "Digital");
                 g_dio.digout.codes = strcat(g_dio.digout.codes, letter);
+                fprintf('Digout channel %s configured.\n', letter);
             elseif contains(thingy, 'none', 'IgnoreCase', true)
-                if ~isfield(g_dio.digout, 'daq')
-                    g_dio.digout.daq = [];
-                elseif isa(g_dio.digout.daq, 'daq.interfaces.DataAcquisition')
+                fprintf('Digout channel %s configured in dummy mode.\n', letter);
+                if isa(g_dio.digout.daq, 'daq.interfaces.DataAcquisition')
                     error('Cannot mix ''ni'' and ''none'' type io ports');
                 end
                 g_dio.digout.codes = strcat(g_dio.digout.codes, letter);                
             end
         end
+    end
+
+    if ~isempty(g_dio.digout.daq)
+        fprintf('Digout daq channels %s:\n', g_dio.digout.codes);
+        disp(g_dio.digout.daq.Channels);
     end
 
 
@@ -124,7 +140,7 @@ function [] = cclabInitDIO(varargin)
 
             if contains(thingy, 'ni', 'IgnoreCase', true)
                 % create daq obj if not already created
-                if ~isfield(g_dio.joystick, 'daq')
+                if isempty(g_dio.joystick.daq)
                     g_dio.joystick.daq = daq('ni');
                     g_dio.joystick.daq.Rate=joyRate;
                 end
@@ -132,17 +148,18 @@ function [] = cclabInitDIO(varargin)
                 ch.Range = [-5, 5];
                 g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);
             elseif contains(thingy, 'none', 'IgnoreCase', true)
-                g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);
-
-                if ~isfield(g_dio.joystick, 'daq')
-                    g_dio.joystick.daq = [];
-                elseif isa(g_dio.joystick.daq, 'daq.interfaces.DataAcquisition')
+                if isa(g_dio.joystick.daq, 'daq.interfaces.DataAcquisition')
                     error('Cannot mix ''ni'' and ''none'' type joystick ports');
                 end
+                fprintf('Joystick channel %s configured in dummy mode.\n', letter);
                 g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);                
-
-            
             end
         end
     end
+
+    if ~isempty(g_dio.joystick.daq)
+        fprintf('Joystick daq channel(s) %s:\n', g_dio.joystick.codes);
+        disp(g_dio.joystick.daq.Channels);
+    end
+
 end
