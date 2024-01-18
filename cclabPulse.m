@@ -9,7 +9,9 @@ function [success, sample] = cclabPulse(varargin)
         error('reward system not ready - call cclabInitReward()');
     else
 
-        % Check input parameters
+        % Check input parameters. 
+        % The first arg is the channel or channels that should get a pulse.
+        % If present, the second arg is the pulse width in MS. 
         global g_dio;
         tPulseWidthMS = 1;
         channel = '';
@@ -24,29 +26,19 @@ function [success, sample] = cclabPulse(varargin)
            'This function expects 1-2 inputs.');
         end
 
-        % 4/24/2023 djs: There are now 5 lines, 'A'-'E'
-        sample = zeros(1, 5);
-        clear = sample;         % bring all lines low at end of pulse
-        if contains(channel, 'A')
-            sample(1) = 1;
-        end
-        if contains(channel, 'B')
-            sample(2) = 1;
-        end
-        if contains(channel, 'C')
-            sample(3) = 1;
-        end
-        if contains(channel, 'D')
-            sample(4) = 1;
-        end
-        if contains(channel, 'E')
-            sample(5) = 1;
-        end
+        % The order of the output array values should correspond to the
+        % channel order.
 
-
-        % check whether we have a daq object or not. 
-        % I assume that the absence of a daq object means that this is a
-        % dummy implementation, and we just write to the screen.
+        sample = zeros(1, length(g_dio.digout.codes));
+        clear = zeros(1, length(g_dio.digout.codes));
+        for ich=1:length(channel)
+            z=strfind(g_dio.digout.codes, channel(ich));
+            if isempty(z)
+                warning('cclabPulse - channel %s was not configured.', channel(ich));
+            else
+                sample(z) = 1;
+            end
+        end
 
         if ~isempty(g_dio.digout.daq)
 
