@@ -35,6 +35,7 @@ if ~isempty(g_dio.joystick.daq)
     end
 else
     % random values
+    warning('Joystick is in dummy mode. Returning random values!');
     joypos = zeros(1, length(g_dio.joystick.codes));
     for icode = 1:length(g_dio.joystick.codes)
         joypos(icode) = randi([-1, 1]);
