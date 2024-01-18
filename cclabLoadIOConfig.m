@@ -21,7 +21,7 @@ function [cConfig] = cclabLoadIOConfig(varargin)
     containingFolder = fileparts(currentFile);
     defaultConfigFile = fullfile(containingFolder, 'cfg', 'rig-right.txt');
     dummyConfigFile = fullfile(containingFolder, 'cfg', 'dummy.txt');
-    maybeBasenameFile = fullfile(containingFolder, 'cfg', strcat(filename, '.txt'))
+    maybeBasenameFile = fullfile(containingFolder, 'cfg', strcat(filename, '.txt'));
 
     % Check whether a filename was passed as an arg
     % if not, check if a basename was passed, 
@@ -31,19 +31,19 @@ function [cConfig] = cclabLoadIOConfig(varargin)
     if isfile(filename)
         fid = fopen(filename);
         cConfig = textscan(fid, "%s\t%s\t%s\t%s\t%s\t%s");
-        fprintf('loaded from passed filename %s\n', filename);
+        fprintf('A/D IO config file %s\n', filename);
     elseif isfile(maybeBasenameFile)
         fid = fopen(maybeBasenameFile);
         cConfig = textscan(fid, "%s\t%s\t%s\t%s\t%s\t%s");
-        fprintf('loaded from passed basename %s\n', maybeBasenameFile);
+        fprintf('A/D IO config file %s\n', maybeBasenameFile);
     elseif contains(filename, 'dummy', 'IgnoreCase', true)
         fid = fopen(dummyConfigFile);
         cConfig = textscan(fid, "%s\t%s\t%s\t%s\t%s\t%s");
-        fprintf('loaded dummy config %s\n', dummyConfigFile);
+        fprintf('A/D IO config file %s\n', dummyConfigFile);
     else
         fid = fopen(defaultConfigFile);
         cConfig = textscan(fid, "%s\t%s\t%s\t%s\t%s\t%s");
-        fprintf('loaded default config %s\n', defaultConfigFile);
+        fprintf('A/D IO config file %s\n', defaultConfigFile);
     end        
     fclose(fid);
 end
