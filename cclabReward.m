@@ -10,11 +10,14 @@ function [success, s] = cclabReward(varargin)
     else
 
         global g_dio;
-        p = inputParser;
-        addRequired(p, 'msec', @(x) isnumeric(x) && isscalar(x) && (x > 0));
-        addOptional(p, 'n', 1, @(x) isnumeric(x) && isscalar(x) && (x > 0));
-        addOptional(p, 'gap', 50, @(x) isnumeric(x) && isscalar(x) && (x > 0));
-        addParameter(p, 'margin', 50, @(x) isnumeric(x) && isscalar(x) && (x > 0))
+        persistent p;
+        if isempty(p)
+            p = inputParser;
+            addRequired(p, 'msec', @(x) isnumeric(x) && isscalar(x) && (x > 0));
+            addOptional(p, 'n', 1, @(x) isnumeric(x) && isscalar(x) && (x > 0));
+            addOptional(p, 'gap', 50, @(x) isnumeric(x) && isscalar(x) && (x > 0));
+            addParameter(p, 'margin', 50, @(x) isnumeric(x) && isscalar(x) && (x > 0))
+        end
         parse(p, varargin{:});
 
         if g_dio.reward.type == "j"
