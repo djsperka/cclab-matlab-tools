@@ -3,4 +3,4 @@ A	digout	ni	port0/line4
 B	digout	ni	port0/line3
 C	digout	ni	port0/line5
 D	digout	ni	port0/line7
-H	joystick	ni	ai0	3.8	1.2
+V	joystick	ni	ai1	3.8	1.2
