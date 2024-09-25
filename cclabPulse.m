@@ -42,18 +42,30 @@ function [success, sample] = cclabPulse(varargin)
 
         if ~isempty(g_dio.digout.daq)
 
-            % spinlock implementation here, using WaitSecs
-            % just a single pulse
-    
-            write(g_dio.digout.daq, sample);
-            WaitSecs(tPulseWidthMS / 1000);
-            write(g_dio.digout.daq, clear);
+            if g_dio.digout.device == "ni"
+                % spinlock implementation here, using WaitSecs
+                % just a single pulse
+        
+                write(g_dio.digout.daq, sample);
+                WaitSecs(tPulseWidthMS / 1000);
+                write(g_dio.digout.daq, clear);
+            elseif g_dio.digout.device == "mcc"
+                v=0;    % will be written to DOut
+                A=find(sample);
+                if ~isempty(A)
+                    v = bitor(v, sum(2.^(A-1)));
+                end
+                DaqDOut(g_dio.digout.daq, g_dio.digout.port, v);
+                WaitSecs(tPulseWidthMS / 1000);
+                DaqDOut(g_dio.digout.daq, g_dio.digout.port, 0);
+            else
+                fprintf('cclabPulse() dummy digout: ');
+                fprintf('%d', sample);
+                fprintf('\n');
+            end
 
         else
 
-            fprintf('cclabPulse() dummy digout: ');
-            fprintf('%d', sample);
-            fprintf('\n');
 
         end
 

@@ -107,6 +107,7 @@ function [] = cclabInitDIO(varargin)
             if contains(thingy, 'ni', 'IgnoreCase', true)
                 % create daq obj if not already created
                 if isempty(g_dio.digout.daq)
+                    g_dio.digout.device = "ni";
                     g_dio.digout.daq = daq('ni');
                     g_dio.digout.daq.Rate=abRate;
                 end
@@ -114,7 +115,21 @@ function [] = cclabInitDIO(varargin)
                 g_dio.digout.codes = strcat(g_dio.digout.codes, letter);
                 fprintf('Digout channel %s configured.\n', letter);
             elseif contains(thingy, 'mcc', 'IgnoreCase', true)
-                error('mcc not implemented for digout channels!');
+                % create daq obj if not already created
+                if isempty(g_dio.digout.daq)
+                    g_dio.digout.device = "mcc";
+                    g_dio.digout.daq = mccDeviceIndex;
+                end
+                if ~isfield(g_dio.digout, 'port')
+                    % configure a port. In theory, there is a max of 8
+                    % channels. First channel will be lowest order bit.
+                    g_dio.digout.port = 0;
+                    err = DaqDConfigPort(g_dio.digout.daq, g_dio.digout.port, 0);
+                    fprintf('mcc digout port %d configured for output\n', g_dio.digout.port);
+                    disp(err);
+                end
+                g_dio.digout.codes = strcat(g_dio.digout.codes, letter);
+                fprintf('Digout channel %s configured.\n', letter);
             elseif contains(thingy, 'none', 'IgnoreCase', true)
                 fprintf('Digout channel %s configured in dummy mode.\n', letter);
                 if isa(g_dio.digout.daq, 'daq.interfaces.DataAcquisition')
@@ -125,10 +140,6 @@ function [] = cclabInitDIO(varargin)
         end
     end
 
-    if ~isempty(g_dio.digout.daq)
-        fprintf('Digout daq channels %s:\n', g_dio.digout.codes);
-        disp(g_dio.digout.daq.Channels);
-    end
 
 
     % analog input - porttype='joystick'

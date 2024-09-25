@@ -52,28 +52,38 @@ function [success, s] = cclabReward(varargin)
                 %let's declare success!
                 success = 1;
             elseif g_dio.reward.device == "mcc"
-                opts.FirstChannel = 0;
-                opts.LastChannel = 0;
-                opts.f = g_dio.reward.Rate;
-                opts.trigger = 0;
-                opts.getReports = 1;
-                opts.print = 1;
-                disp(opts);
-                params=DaqAOutScan(g_dio.reward.daq, s, opts);
 
-
-                if isempty(params.start)
-                  params.start=nan;
-                end
-                if isempty(params.end)
-                  params.end=nan;
-                end
-                c = 1;
-                fprintf('Sent %.0f (out of %.0f) samples/channel on %d channels in %.0f (out of %.0f) ms. Actual rate %f\n',...
-                  params.countActual,length(s),c,1000*(params.end-params.start),1000*length(s)/opts.f, params.fActual);
-                r=(params.numberOfReportsSent-1)/(params.end-params.start);
-                fprintf('Sending speed was %.0f report/s, %.0f sample/channel/s.\n',r,r*32/c);
+                % Doesn't seem to work right on windows or linux. No time
+                % to decipher/fix, change to using WaitSecs as temp fix.
+                %
+                % opts.FirstChannel = 0;
+                % opts.LastChannel = 0;
+                % opts.f = g_dio.reward.Rate;
+                % opts.trigger = 0;
+                % opts.getReports = 1;
+                % opts.print = 1;
+                % disp(opts);
+                % disp(size(s));
+                % params=DaqAOutScan(g_dio.reward.daq, s, opts);
+                % 
+                % 
+                % if isempty(params.start)
+                %   params.start=nan;
+                % end
+                % if isempty(params.end)
+                %   params.end=nan;
+                % end
+                % c = 1;
+                % fprintf('Sent %.0f (out of %.0f) samples/channel on %d channels in %.0f (out of %.0f) ms. Actual rate %f\n',...
+                %   params.countActual,length(s),c,1000*(params.end-params.start),1000*length(s)/opts.f, params.fActual);
+                % r=(params.numberOfReportsSent-1)/(params.end-params.start);
+                % fprintf('Sending speed was %.0f report/s, %.0f sample/channel/s.\n',r,r*32/c);
                 
+                % As a compromise, respect only the reward time, no repeats
+                % Change channel 0 (pins 13/12=gnd)
+                DaqAOut(g_dio.reward.daq, 0, 1);
+                WaitSecs(p.Results.msec/1000);
+                DaqAOut(g_dio.reward.daq, 0, 0);
                 success = 1;
             else
                 error('Unhandled device type in cclabReward()');
