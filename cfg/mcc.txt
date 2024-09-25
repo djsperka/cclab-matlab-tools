@@ -1,0 +1,4 @@
+j	reward	mcc	
+#A	digout	mcc	port0/line4
+#B	digout	mcc	port0/line3
+#V	joystick	mcc	ai1	3.8	1.2

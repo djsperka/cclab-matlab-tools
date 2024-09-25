@@ -5,7 +5,7 @@ function [] = cclabInitDIO(varargin)
 % config for the right rig. 
 
 
-    rewardRate = 5000;
+    rewardRate = 5000;  % default reward rate will be set per-device below
     abRate = 1000000;
     joyRate = 1000;
 
@@ -35,8 +35,17 @@ function [] = cclabInitDIO(varargin)
         end
         if niDevID ~= 'None'
             fprintf('NI device is present, DeviceID %s\n', niDevID);
+            rewardRate = 5000;
         else
-            fprintf('NI device not found!');
+            error('NI device not found, check cfg file.');
+        end
+    elseif any(contains(cConfig{3}, 'mcc'))
+        mccDeviceIndex = DaqDeviceIndex;
+        if ~isempty(mccDeviceIndex)
+            fprintf('MCC device found, index %d\n', mccDeviceIndex);
+            rewardRate = 500;
+        else
+            error('MCC device not found - check cfg file.');
         end
     end
 
@@ -55,14 +64,19 @@ function [] = cclabInitDIO(varargin)
 
         if contains(thingy, 'ni', 'IgnoreCase', true)
             % create daq object, populate it
-            g_dio.reward.type = "j";
+            g_dio.reward.device = "ni";
             g_dio.reward.daq = daq("ni");
-            g_dio.reward.daq.Rate = rewardRate;
+            g_dio.reward.Rate = rewardRate;
+            g_dio.reward.daq.Rate = rewardRate; % ni daq obj needs this too
             ch = addoutput(g_dio.reward.daq, niDevID, "ao0", "Voltage");
             fprintf('Reward channel configured:\n');
             %disp(ch);
+        elseif contains(thingy, 'mcc', 'IgnoreCase', true)
+            g_dio.reward.device = "mcc";
+            g_dio.reward.daq = mccDeviceIndex;  % just storing the index as the daq
+            g_dio.reward.Rate = rewardRate;     % not storign this inside of daq obvi.
         elseif contains(thingy, 'none', 'IgnoreCase', true)
-            g_dio.reward.type = "n";
+            g_dio.reward.device = "none";
             g_dio.reward.daq = [];
             fprintf('Reward channel configured in dummy mode.\n');
         else
@@ -70,10 +84,10 @@ function [] = cclabInitDIO(varargin)
         end
     end
 
-    if ~isempty(g_dio.reward.daq)
-        fprintf('Reward daq channels:\n');
-        disp(g_dio.reward.daq.Channels);
-    end
+    % if ~isempty(g_dio.reward.daq)
+    %     fprintf('Reward daq channels:\n');
+    %     disp(g_dio.reward.daq.Channels);
+    % end
 
 
     
@@ -99,6 +113,8 @@ function [] = cclabInitDIO(varargin)
                 ch = addoutput(g_dio.digout.daq, niDevID, portname, "Digital");
                 g_dio.digout.codes = strcat(g_dio.digout.codes, letter);
                 fprintf('Digout channel %s configured.\n', letter);
+            elseif contains(thingy, 'mcc', 'IgnoreCase', true)
+                error('mcc not implemented for digout channels!');
             elseif contains(thingy, 'none', 'IgnoreCase', true)
                 fprintf('Digout channel %s configured in dummy mode.\n', letter);
                 if isa(g_dio.digout.daq, 'daq.interfaces.DataAcquisition')
@@ -147,6 +163,8 @@ function [] = cclabInitDIO(varargin)
                 ch = addinput(g_dio.joystick.daq, niDevID, portname, "Voltage");
                 ch.Range = [-5, 5];
                 g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);
+            elseif contains(thingy, 'mcc', 'IgnoreCase', true)
+                error('mcc not implemented for joystick channels!');
             elseif contains(thingy, 'none', 'IgnoreCase', true)
                 if isa(g_dio.joystick.daq, 'daq.interfaces.DataAcquisition')
                     error('Cannot mix ''ni'' and ''none'' type joystick ports');
