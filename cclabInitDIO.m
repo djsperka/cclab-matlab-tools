@@ -169,18 +169,30 @@ function [] = cclabInitDIO(varargin)
                 % create daq obj if not already created
                 if isempty(g_dio.joystick.daq)
                     g_dio.joystick.daq = daq('ni');
-                    g_dio.joystick.daq.Rate=joyRate;
+                    g_dio.joystick.Rate=joyRate;
+                    g_dio.joystick.daq.Rate=joyRate;    % ni has rate here also
                 end
                 ch = addinput(g_dio.joystick.daq, niDevID, portname, "Voltage");
                 ch.Range = [-5, 5];
                 g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);
             elseif contains(thingy, 'mcc', 'IgnoreCase', true)
-                error('mcc not implemented for joystick channels!');
+                % create daq obj if not already created
+                if isempty(g_dio.joystick.daq)
+                    g_dio.joystick.daq = mccDeviceIndex;
+                    g_dio.joystick.Rate=joyRate;
+                    % portname is actually the channel as a string
+                    g_dio.joystick.channels = str2num(portname);
+                else
+                    g_dio.joystick.channels(end+1) = str2num(portname);
+                end
+                % mcc does not require any config at this point.
+                g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);
             elseif contains(thingy, 'none', 'IgnoreCase', true)
                 if isa(g_dio.joystick.daq, 'daq.interfaces.DataAcquisition')
                     error('Cannot mix ''ni'' and ''none'' type joystick ports');
                 end
                 fprintf('Joystick channel %s configured in dummy mode.\n', letter);
+                g_dio.joystick.device = 'none';
                 g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);                
             end
         end
