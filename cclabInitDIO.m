@@ -168,6 +168,7 @@ function [] = cclabInitDIO(varargin)
             if contains(thingy, 'ni', 'IgnoreCase', true)
                 % create daq obj if not already created
                 if isempty(g_dio.joystick.daq)
+                    g_dio.joystick.device = "ni";
                     g_dio.joystick.daq = daq('ni');
                     g_dio.joystick.Rate=joyRate;
                     g_dio.joystick.daq.Rate=joyRate;    % ni has rate here also
@@ -178,6 +179,7 @@ function [] = cclabInitDIO(varargin)
             elseif contains(thingy, 'mcc', 'IgnoreCase', true)
                 % create daq obj if not already created
                 if isempty(g_dio.joystick.daq)
+                    g_dio.joystick.device = "mcc";
                     g_dio.joystick.daq = mccDeviceIndex;
                     g_dio.joystick.Rate=joyRate;
                     % portname is actually the channel as a string
@@ -188,8 +190,8 @@ function [] = cclabInitDIO(varargin)
                 % mcc does not require any config at this point.
                 g_dio.joystick.codes = strcat(g_dio.joystick.codes, letter);
             elseif contains(thingy, 'none', 'IgnoreCase', true)
-                if isa(g_dio.joystick.daq, 'daq.interfaces.DataAcquisition')
-                    error('Cannot mix ''ni'' and ''none'' type joystick ports');
+                if ~isempty(g_dio.joystick.daq)
+                    error('Cannot mix ''ni'' or ''mcc'' and ''none'' type joystick ports');
                 end
                 fprintf('Joystick channel %s configured in dummy mode.\n', letter);
                 g_dio.joystick.device = 'none';
@@ -197,10 +199,4 @@ function [] = cclabInitDIO(varargin)
             end
         end
     end
-
-    if ~isempty(g_dio.joystick.daq)
-        fprintf('Joystick daq channel(s) %s:\n', g_dio.joystick.codes);
-        disp(g_dio.joystick.daq.Channels);
-    end
-
 end

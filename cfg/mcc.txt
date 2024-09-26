@@ -1,4 +1,4 @@
 j	reward	mcc	
 A	digout	mcc
 B	digout	mcc
-#V	joystick	mcc	ai1	3.8	1.2
+V	joystick	mcc	8	3.8	1.2
