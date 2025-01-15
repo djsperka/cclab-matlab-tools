@@ -6,15 +6,13 @@ function cclabCloseDIO()
 %   elsewhere in your script. Calling this function multiple times is not
 %   harmful. 
 
-
-%   clean up reward system parts of dio
-%    cclabCloseReward();
-
 %   Now clean up pulse channels. Have to re-declare g_dio and see if its
 %   empty or not, then clear it again. 
     global g_dio;
     if ~isempty(g_dio)
-        g_dio.daqAB = [];
+        g_dio.digout = [];
+        g_dio.reward = [];
+        g_dio.joystick = [];
     end
     clear global g_dio;
 end
