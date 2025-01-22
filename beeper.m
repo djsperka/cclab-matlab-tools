@@ -1,6 +1,11 @@
 classdef beeper < handle
-    %beeper Generate one of two beeps.
-    %   Detailed explanation goes here
+    %beeper Generate simple sounds (tones or from file).
+    %   This class uses PTB's PortAudio plugin for generating sounds.
+    %   Originally intended as a "right/wrong" beeper (see @twotonebeeper),
+    %   this class plays (and blocks while playing) tones or sounds of a
+    %   specified length. This class was intended for brief auditory
+    %   feedback during an experiment, and so the 'play' method blocks
+    %   execution of your script while the sound is playing. 
     
     properties (Access = private)
         PAHandle
@@ -12,14 +17,8 @@ classdef beeper < handle
 
     methods
         function obj = beeper(s, OpenSnd)
-            %beeper Class that makes sounds for you, either tones or wav
-            %files.
-            %   Correct (default 800) is freq of correct() tone, Incorrect (default 350) is freq of
-            %   incorrect(). Duration (default 0.25s) is in sec.
-            %   A filename of a sound file may be supplied for both Correct
-            %   and Incorrect (both must be files, or else neither). In
-            %   this case, the frequencies of the two files must be the
-            %   same.
+            %Instantiate a beeper class with no sounds. OpenSnd should be 1
+            %if you intend to use Snd (e.g. with Eyelink). Default is 0.
             
             arguments
                 s {mustBeOKBeeperArg} = []
@@ -56,6 +55,12 @@ classdef beeper < handle
         end
         
         function [ind] = addsound(obj, name, freq_or_file, dur)
+            % Add a sound to the beeper. 
+            % name is a unique identifier (using a previously used name 
+            % will replace the sound). freq_or_file is either a 
+            % frequency (in which case you get a tone) or an existing
+            % sound filename. dur is the duration of the sound in
+            % seconds. The default duration is 0.25s. 
 
             arguments (Input)
                 obj (1,1) beeper
@@ -93,10 +98,14 @@ classdef beeper < handle
         end
 
         function info(obj)
+            % Print info about the sounds this beeper has.
             obj.print_sounds_info();
         end
 
         function play(obj, id)
+            % The sound with id is played for its duration
+            % id can be the name provided in the call to addsound(), 
+            % or it can be the index returned from addsound.
 
             if ischar(id)
                 if isKey(obj.SNameIndexMap, id)
