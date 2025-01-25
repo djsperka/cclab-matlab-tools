@@ -1,4 +1,4 @@
-function [tf, s] = animMgrSampleCallback(ind, t, ~, w, s)
+function [tf, sreturned] = animMgrSampleCallback(ind, t, ~, w, s)
 %animMgrSampleCallback Callback for AnimMgr - animate a fade-out rectangle.
 %   User data arg must be a struct with fields color, on, ramp, off, thick
 %   thick is the line thickness for 'FrameRect'. If 0, 'FillRect' is used
@@ -7,6 +7,7 @@ function [tf, s] = animMgrSampleCallback(ind, t, ~, w, s)
 
 
     if ind
+        s.values = [s.values, t];
         [srcfactorOld, dstFactorOld, ~] = Screen('BlendFunction', w, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         color=s.color;
         if t < s.on
@@ -35,4 +36,5 @@ function [tf, s] = animMgrSampleCallback(ind, t, ~, w, s)
     else
         tf = false;   % ignored when ind==0
     end
+    sreturned = s;
 end
