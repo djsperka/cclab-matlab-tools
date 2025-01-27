@@ -38,8 +38,10 @@ classdef OneShotMilestone < handle
 
     methods
         function obj = OneShotMilestone(milestones)
-            %OneShotMilestone Construct an instance of this class
-            %   Detailed explanation goes here
+            %Construct an instance of this class with a given set of
+            %milestones.
+            %   The milestones given should be of the same type as the
+            %   value(s) passed to check() and/or pass().
             if ~isnumeric(milestones) || ~isvector(milestones)
                 error('Milestones must be a numeric vector');
             end
@@ -56,7 +58,7 @@ classdef OneShotMilestone < handle
             %marked as passed, however! Must call pass() for that. 
             %   Detailed explanation goes here
 
-            passing_ind = find(~obj.MilestonesPassed & f >= obj.Milestones);
+            passing_ind = find(~obj.MilestonesPassed & f >= obj.Milestones, 1);
             would_pass = ~isempty(passing_ind);
 
         end
