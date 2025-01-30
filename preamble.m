@@ -42,33 +42,36 @@ classdef preamble < handle
     end
 
     methods
-        function obj = preamble(cmds, textSize, resp, img, beVerbose)
+        function obj = preamble(textSize, resp, img, beVerbose)
             %UNTITLED4 Construct an instance of this class
             %   Detailed explanation goes here
             arguments
-                cmds (:,2) cell
+%                cmds (:,2) cell
                 textSize (1,1) {mustBeInteger}
                 resp responder
                 img imageset
                 beVerbose (1,1) {mustBeNumericOrLogical} = false
             end
-            obj.Script = cmds;
+%            obj.Script = cmds;
             obj.TextSize = textSize;
             obj.Responder = resp;
             obj.Imageset = img;
             obj.IsVerbose = beVerbose;
         end
 
-        function play(obj,w)
+        function play(obj,script,w)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
             arguments
                 obj (1,1) preamble
+                script (:,2) cell
                 w (1,1) {mustBeInteger}
             end
 
+            % save script
+            obj.Script = script;
+            
             % Get size of text
-
             obj.OldTextSize = Screen('TextSize', w, obj.TextSize);
             [~, ~, bbox] = DrawFormattedText(w, 'X',0,0);
             obj.CharWidth = RectWidth(bbox);
