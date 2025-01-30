@@ -70,7 +70,7 @@ classdef preamble < handle
 
             % save script
             obj.Script = script;
-            
+
             % Get size of text
             obj.OldTextSize = Screen('TextSize', w, obj.TextSize);
             [~, ~, bbox] = DrawFormattedText(w, 'X',0,0);
@@ -112,56 +112,62 @@ classdef preamble < handle
         end
 
         function do_cmd(obj, w, cmd, args)
-            switch(cmd)
-                case 'mkey'
-                    obj.mkey(w, obj.DrawRect, args{:});
-                case 'image'
-                    obj.image(w, obj.DrawRect, args{:});
-                case 'text'
-                    if length(args{1}) > 0
-                        [~, obj.TextYNext, ~, ~] = DrawFormattedText(w, args{1}, 'center', obj.TextYNext + obj.CharHeight, [0,0,0]);
-                    end
-                    Screen('Flip', w);
-                    if isnumeric(args{2})
-                        obj.wait_for_button(args{2}, 30);
-                    else
-                        obj.opmsg_and_wait(args{2});
-                    end                    
-                case 'flip'
-                    Screen('Flip', w);
-                    % args are ignored!
-                    % WaitSecs(args);
-                case 'clear_screen'
-                    Screen('Flip', w);
-                case 'wait_button'
-                    obj.wait_for_button(args, 30);
-                case 'operator'
-                    obj.opmsg_and_wait(w, args);
-                case 'slide'
-                    % equivalent of 
-                    % 'image', {args{1}}; ...
-                    % 'text', args{2}; ...
-                    % 'flip', 0.0; ...
-                    % If the third arg is numeric, then
-                    % 'wait_button', args{3}; ...
-                    % If its char, then print to screen and wait 
-                    % for a keypress
-                    % 'operator', args{3}; ...
-                    
-                    obj.image(w, obj.DrawRect, args{1});
-                    if length(args{2}) > 0
-                        obj.TextYNext + obj.CharHeight
-                        [~, obj.TextYNext, ~, ~] = DrawFormattedText(w, args{2}, 'center', obj.TextYNext + obj.CharHeight, [0,0,0]);
-                    end
-                    Screen('Flip', w);
-                    if isnumeric(args{3})
-                        obj.wait_for_button(args{3}, 30);
-                    else
-                        obj.opmsg_and_wait(args{3});
-                    end
+            if isa(cmd, 'function_handle')
+                args{:}
+                cmd(w,args{:});
+            else
+                switch(cmd)
+                    case 'mkey'
+                        obj.mkey(w, obj.DrawRect, args{:});
+                    case 'image'
+                        obj.image(w, obj.DrawRect, args{:});
+                    case 'text'
+                        % 
+                        if length(args{1}) > 0
+                            [~, obj.TextYNext, ~, ~] = DrawFormattedText(w, args{1}, 'center', obj.TextYNext + obj.CharHeight, [0,0,0]);
+                        end
+                        Screen('Flip', w);
+                        if isnumeric(args{2})
+                            obj.wait_for_button(args{2}, 30);
+                        else
+                            obj.opmsg_and_wait(args{2});
+                        end                    
+                    case 'flip'
+                        Screen('Flip', w);
+                        % args are ignored!
+                        % WaitSecs(args);
+                    case 'clear_screen'
+                        Screen('Flip', w);
+                    case 'wait_button'
+                        obj.wait_for_button(args, 30);
+                    case 'operator'
+                        obj.opmsg_and_wait(args{1});
+                    case 'slide'
+                        % equivalent of 
+                        % 'image', {args{1}}; ...
+                        % 'text', args{2}; ...
+                        % 'flip', 0.0; ...
+                        % If the third arg is numeric, then
+                        % 'wait_button', args{3}; ...
+                        % If its char, then print to screen and wait 
+                        % for a keypress
+                        % 'operator', args{3}; ...
                         
-                otherwise
-                    fprintf(1, 'Command %s not implemented\n', cmd);
+                        obj.image(w, obj.DrawRect, args{1});
+                        if length(args{2}) > 0
+                            obj.TextYNext + obj.CharHeight
+                            [~, obj.TextYNext, ~, ~] = DrawFormattedText(w, args{2}, 'center', obj.TextYNext + obj.CharHeight, [0,0,0]);
+                        end
+                        Screen('Flip', w);
+                        if isnumeric(args{3})
+                            obj.wait_for_button(args{3}, 30);
+                        else
+                            obj.opmsg_and_wait(args{3});
+                        end
+                            
+                    otherwise
+                        fprintf(1, 'Command %s not implemented\n', cmd);
+                end
             end
         end
     end
