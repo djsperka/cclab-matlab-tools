@@ -6,6 +6,7 @@ classdef FixationPoint
         XY
         Diameter
         Color
+        DirVecs
     end
 
     properties (Access = private)
@@ -16,7 +17,7 @@ classdef FixationPoint
     end
 
     methods
-        function obj = FixationPoint(xy,diameter,color,fixptType,thickness)
+        function obj = FixationPoint(xy,diameter,color,fixptType,thickness,dirvecs)
             %FixationPoint Create a fixation point object.
             %   Detailed explanation goes here
 
@@ -26,11 +27,13 @@ classdef FixationPoint
                 color (1,3) {mustBeNumeric}
                 fixptType char {mustBeMember(fixptType, 'o+')} = 'o'
                 thickness (1,1) {mustBeNumeric} = 4
+                dirvecs {myMustBeMatrix} = []
             end
 
             obj.XY = xy;
             obj.Diameter = diameter;
             obj.Color = color;
+            obj.DirVecs = dirvecs;
             if isscalar(obj.Diameter)
                 xdiam = obj.Diameter;
                 ydiam = obj.Diameter;
@@ -67,7 +70,7 @@ classdef FixationPoint
             arguments
                 obj FixationPoint
                 w (1,1) {mustBeNumeric}
-                cue char {mustBeMember(cue,'lrudn')} = 'n'
+                cue  {myMustBeCharOrInt} = 'n'
             end
 
             switch obj.Type
@@ -78,23 +81,56 @@ classdef FixationPoint
                     end
                 case '+'
                     Screen('DrawLines', w, obj.Lines, obj.Thickness, obj.Color);
-                    if cue ~= 'n'
-                        switch cue
-                            case 'l'
-                                dirvec = [-1,0];
-                            case 'r'
-                                dirvec = [1,0];
-                            case 'u'
-                                dirvec = [0,1];
-                            case 'd'
-                                dirvec = [0,-1];
+
+                    % see if we should draw cue
+                    if ischar(cue)
+                        if cue ~= 'n'
+                            switch cue
+                                case 'l'
+                                    dirvec = [-1,0];
+                                case 'r'
+                                    dirvec = [1,0];
+                                case 'u'
+                                    dirvec = [0,1];
+                                case 'd'
+                                    dirvec = [0,-1];
+                            end
+                            [~,segments] = getChevrons(obj.XY, dirvec, obj.Diameter/2, 5, obj.Diameter/4, obj.Diameter/4, 1);
+                            Screen('DrawLines', w, segments, obj.Thickness, obj.Color);
                         end
-                        [~,segments] = getChevrons(obj.XY, dirvec, obj.Diameter/2, 5, obj.Diameter/4, obj.Diameter/4, 1);
-                        Screen('DrawLines', w, segments, obj.Thickness, obj.Color);
+                    else
+                        if cue > 0
+                            if isempty(obj.DirVecs)
+                                error('Cannot draw integer cue unless FixationPoint is instantiated with direction vectors.');
+                            elseif cue < 0 || cue > size(obj.DirVecs, 1)
+                                error('Integer cue value (%d) is not a valid index into direction vectors', cue);
+                            else
+                                dirvec = obj.DirVecs(cue,:);
+                                [~,segments] = getChevrons(obj.XY, dirvec, obj.Diameter/2, 5, obj.Diameter/4, obj.Diameter/4, 1);
+                                Screen('DrawLines', w, segments, obj.Thickness, obj.Color);
+                            end
+                        end
                     end
+
                 otherwise
                     error('Unhandled fixpt type');
             end
         end
+    end
+end
+
+function myMustBeMatrix(x)
+    if ~ismatrix(x)
+        error('Must be a matrix.');
+    end
+end
+
+function myMustBeCharOrInt(x)
+    if ischar(x)
+        if ~ismember(x,'lrudn')
+            error('Char cue must be one of lrudn');
+        end
+    elseif isnumeric(x)
+            mustBeInteger(x);
     end
 end
