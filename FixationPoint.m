@@ -17,7 +17,7 @@ classdef FixationPoint
     end
 
     methods
-        function obj = FixationPoint(xy,diameter,color,fixptType,thickness,dirvecs)
+        function obj = FixationPoint(xy,diameter,color,fixptType,options)
             %FixationPoint Create a fixation point object.
             %   Detailed explanation goes here
 
@@ -26,14 +26,14 @@ classdef FixationPoint
                 diameter (1,:) {mustBeNumeric}
                 color (1,3) {mustBeNumeric}
                 fixptType char {mustBeMember(fixptType, 'o+')} = 'o'
-                thickness (1,1) {mustBeNumeric} = 4
-                dirvecs {myMustBeMatrix} = []
+                options.thickness (1,1) {mustBeNumeric} = 4
+                options.dirvecs {myMustBeMatrix} = []
             end
 
             obj.XY = xy;
             obj.Diameter = diameter;
             obj.Color = color;
-            obj.DirVecs = dirvecs;
+            obj.DirVecs = options.dirvecs;
             if isscalar(obj.Diameter)
                 xdiam = obj.Diameter;
                 ydiam = obj.Diameter;
@@ -56,7 +56,7 @@ classdef FixationPoint
                         obj.XY(1), obj.XY(2) + ydiam/2; ...
                         obj.XY(1), obj.XY(2) - ydiam/2
                         ]';
-                    obj.Thickness = thickness;
+                    obj.Thickness = options.thickness;
                 otherwise
                     error('Unhandled fixpt type');
             end
@@ -91,9 +91,9 @@ classdef FixationPoint
                                 case 'r'
                                     dirvec = [1,0];
                                 case 'u'
-                                    dirvec = [0,1];
+                                    dirvec = [0,-1];  % PTB screens are positive-down
                                 case 'd'
-                                    dirvec = [0,-1];
+                                    dirvec = [0,1];
                             end
                             [~,segments] = getChevrons(obj.XY, dirvec, obj.Diameter/2, 5, obj.Diameter/4, obj.Diameter/4, 1);
                             Screen('DrawLines', w, segments, obj.Thickness, obj.Color);
