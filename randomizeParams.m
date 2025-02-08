@@ -1,13 +1,21 @@
 function [t] = randomizeParams(varargin)
-%randomizeParams Generate a table randomized over a set of parameters. 0
+%randomizeParams Generate a table randomized over a set of parameters.
 %   Each of the first parameters is combined with each of the second, each
 %   of which is combined with the next parameter, and so on. The cell
 %   array reps determines the order and multiplicity at each step. 
+%   Parameter VariableNames is a cell array of strings. Each element is
+%   used as a column name. Replacements is a cell array of the same
+%   dimension as VariableNames. Each element should be a column vector of
+%   values to be randomized over. The values will be placed in the column
+%   whose name is taken from the same element of VariableNames.
+%   Example: Generate a table with columns "Number", "Letter". Number
+%   should take on all values from 1-3, and Letter should take on values
+%   'a' and 'b'. 
 %
-%   e.g. 
-%   numImages = 30;
-%   imageIndices = randperm(imgset.BalancedFileKeys(1:100), numImages);
-%   reps{1} = imgset.BalancedFileKeys(imageIndices);
+%   vars = {'Number'; 'Letter'};
+%   reps = {[1:3]';[1:2]'};
+%   table = randomizeParams('VariableNames', vars, 'Replacements', reps);
+%
 
     
     p = inputParser;
@@ -28,6 +36,9 @@ function [t] = randomizeParams(varargin)
 
     % get multiplicities from the size of first dim of each element (the
     % height of each one).
+    % m(i) is the multiplicity of the i'th replacement.
+    % n is the total number of trials that will be generated.
+
     m = cellfun(@(x) size(x,1), p.Results.Replacements);
     n = prod(m);
     
@@ -46,11 +57,17 @@ function [t] = randomizeParams(varargin)
         if ~isempty(p.Results.Replacements)
             if ~isempty(p.Results.Replacements{i})
                 s=size(p.Results.Replacements{i});
-                if s(2)==1 && s(1)==m(i)
-                    A = p.Results.Replacements{i}(pind(:,i));
+                % if s(2)==1 && s(1)==m(i)
+                %     A = p.Results.Replacements{i}(pind(:,i));
+                % else
+                %     error('Replacements must be empty {} or column vectors with same multiplicity as corresponding column');
+                % end
+                if s(1)==m(i)
+                    A = p.Results.Replacements{i}(pind(:,i),:);
                 else
                     error('Replacements must be empty {} or column vectors with same multiplicity as corresponding column');
                 end
+
             else
                 A = pind(:, i);
             end
