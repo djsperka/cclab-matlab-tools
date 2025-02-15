@@ -64,7 +64,7 @@ classdef imageset
             p = inputParser;
             %addRequired(p, 'Root', @(x) ischar(x) && isdir(x));
             addRequired(p, 'Root');
-            addParameter(p,'ParamsFunc','', @(x) ischar(x));
+            addOptional(p,'ParamsFunc','', @(x) ischar(x));
             %addParameter(p, 'Subfolders', {'H', {'natT', 'naturalT'}; 'L', 'texture'}, @(x) iscellstr(x) && size(x, 2)==2);
             %addParameter(p, 'Subfolders', {'', '.'}, @(x) (iscellstr(x) && size(x, 2)==2 || iscell(x)&&isempty(x)));
             addParameter(p, 'Subfolders', {'', '.'}, @(x) (isempty(x) || (iscell(x) && size(x, 2)==2 && all(cellfun(@(y) (ischar(y) || iscellstr(y)), x), 'all'))));
