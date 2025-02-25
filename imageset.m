@@ -65,8 +65,6 @@ classdef imageset
             %addRequired(p, 'Root', @(x) ischar(x) && isdir(x));
             addRequired(p, 'Root');
             addOptional(p,'ParamsFunc','', @(x) ischar(x));
-            %addParameter(p, 'Subfolders', {'H', {'natT', 'naturalT'}; 'L', 'texture'}, @(x) iscellstr(x) && size(x, 2)==2);
-            %addParameter(p, 'Subfolders', {'', '.'}, @(x) (iscellstr(x) && size(x, 2)==2 || iscell(x)&&isempty(x)));
             addParameter(p, 'Subfolders', {'', '.'}, @(x) (isempty(x) || (iscell(x) && size(x, 2)==2 && all(cellfun(@(y) (ischar(y) || iscellstr(y)), x), 'all'))));
             addParameter(p, 'Extensions', {'.bmp', '.jpg', '.png'});
             addParameter(p, 'OnLoad', [], @(x) isempty(x) || isa(x, 'function_handle'));  % check if isempty()
@@ -268,9 +266,25 @@ classdef imageset
             end
         end
         
-        function r = rect(obj, k)
-            key = obj.parse_key(k);
-            r = [0 0 size(obj.get_image(key), 1:2)];
+        function [r, isUniform] = rect(obj, k)
+            % Return rect that contains the image with key 'k'. If 'k' is
+            % omitted or empty, then returns the rect for all images in the
+            % imageset. 'isUniform' tells whether all images in this set
+            % have the same size. If an imageset is NOT uniform, the rect
+            % returned for "all images" is the rect of the first image
+            % read, so good luck.
+         
+            arguments
+                obj (1,1) imageset
+                k {mustBeTextScalar} = ''
+            end
+            isUniform = obj.IsUniform;
+            if strlength(k) > 0
+                key = obj.parse_key(k);
+                r = [0 0 size(obj.get_image(key), 1:2)];
+            else
+                r = obj.UniformOrFirstRect;
+            end
         end
         
         function flip(obj, varargin)
