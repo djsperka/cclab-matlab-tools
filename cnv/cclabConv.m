@@ -1,6 +1,28 @@
 function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL, mean_imbwtextureFINAL] = cclabConv(inputFolder, outputFolderRoot, inputExtension)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%cclabConv Image processing and conversion for cclab ethological salience
+%expt. 
+%   All files in the input folder with the 'inputExtension' are assumed
+%to be input. Subfolders named 'color', 'color-texture', 'bw', and
+%'bw-texture' are created under the 'outputFolderRoot' (no warnings if
+%these folders exist, and no warnings if files are overwritten). The
+%raw color images are assumed to be 256x256.
+%
+%Raw color -> histeq -> FINAL color image (saved to 'color' folder)
+%FINAL color -> rgb2gray ->FINAL bw image 
+%
+%For the texture processing, each plane (r,g,b) of the color image is
+%separately processed to produce texture for each color plane. The
+%color planes are recombined and the resulting image is saved in the
+%'color-texture' folder. This texture files is then sent through rgb2gray
+%to produce the final bw-texture image. 
+%
+%FINAL color -> RED   -> textureProcessing -> textureSynthesis -> R-tex
+%            -> BLUE  -> textureProcessing -> textureSynthesis -> G-tex
+%            -> GREEN -> textureProcessing -> textureSynthesis -> B-tex
+%
+%FINAL color texture = (R-tex, G-tex, B-tex)
+%FINAL bw texture = rgb2gray(FINAL color texture)
+%
 
     arguments
         inputFolder char {mustBeFolder},
