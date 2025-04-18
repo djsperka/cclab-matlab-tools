@@ -1,4 +1,4 @@
-function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL, mean_imbwtextureFINAL] = cclabConv(inputFolder, outputFolderRoot, inputExtension)
+function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL, mean_imbwtextureFINAL] = cclabConv(inputFolder, outputFolderRoot, options)
 %cclabConv Image processing and conversion for cclab ethological salience
 %expt. 
 %   All files in the input folder with the 'inputExtension' are assumed
@@ -27,7 +27,19 @@ function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL
     arguments
         inputFolder char {mustBeFolder},
         outputFolderRoot char {mustBeFolder},
-        inputExtension char = 'bmp'
+        options.inputExtension char = 'bmp',
+        options.doHisteq {mustBeNumericOrLogical} = 0,
+        options.testfile char = ''              % use 'file.ext'
+        options.nFiles (1,1) {mustBeNumeric} = 0 % cannot use this and testfile
+    end
+
+
+    % if doHisteq is true, we will process raw image using histeq.
+    % if not, deal is a no-op
+    if options.doHisteq
+        onLoadFunc = @histeq;
+    else
+        onLoadFunc = @deal;
     end
 
 
@@ -35,7 +47,7 @@ function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL
     % Make a little function to catch warn msgs that happen if dir exists.
     % The cellfun does the trick.
 
-    folders = fullfile(outputFolderRoot, {'color','color-texture','bw','bw-texture'});
+    folders = fullfile(outputFolderRoot, {'color','color-tex','bw','bw-tex'});
     function [status] = mymkdir(x)
         [status, ~, ~] = mkdir(x);
     end
@@ -46,10 +58,20 @@ function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL
     destSize = [256, 256];
     randomSeed = 9999;
     outputExtension = 'bmp';
-    zfile = fullfile(inputFolder, ['*.', inputExtension]);
+    if isempty(options.testfile)
+        zfile = fullfile(inputFolder, ['*.', options.inputExtension]);
+    else
+        zfile = fullfile(inputFolder, options.testfile);
+    end        
     inputFiles = dir(zfile);
     nFiles = length(inputFiles);
     fprintf('Found %d files matching %s\n', nFiles, zfile);
+
+    % nFiles
+    if options.nFiles && isempty(options.testfile)
+        nFiles = min(nFiles, options.nFiles);
+        fprintf('Will process %d files\n', nFiles);
+    end
 
     % outputs.
     mean_imcolorFINAL = zeros(nFiles, 1);
@@ -59,7 +81,7 @@ function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL
     basenames = cell(nFiles, 1);
     
     for i=1:nFiles
-        fprintf('%d: %s\n', i, inputFiles(i).name);
+        fprintf('%d: %s ', i, inputFiles(i).name);
         filename = fullfile(inputFiles(i).folder, inputFiles(i).name);
         [~, basename, ~] = fileparts(filename);  % basename will be used to form output filename
         outputBasename = [basename, '.', outputExtension];
@@ -69,17 +91,17 @@ function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL
         % point, and will be the image we use as the 'color' image.
         % The destination size is imposed HERE, so all subsequent
         % operations will result in same size images. 
-        im0 = imread(filename);
-        imcolorFINAL = imresize(histeq(im0), destSize);
+        fprintf('load...');
+        im0 = onLoadFunc(imread(filename));
+        imcolorFINAL = imresize(im0, destSize);
 
         % Convert imEq to bw - this is the FINAL
+        fprintf('gen bw...');
         imbwFINAL = rgb2gray(imcolorFINAL);
 
         % do texture analysis separately for each plane r,g,b, so get a
         % single-plane image using each.
-        imRed = double(squeeze(imcolorFINAL(:,:,1)));
-        imGreen = double(squeeze(imcolorFINAL(:,:,2)));
-        imBlue = double(squeeze(imcolorFINAL(:,:,3)));
+        [imRed, imGreen, imBlue] = imsplit(double(imcolorFINAL));
         
         % Texture analysis parameters
         Nsc = 4; % Number of scales
@@ -87,8 +109,11 @@ function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL
         Na = 7;  % Spatial neighborhood is Na x Na coefficients, must be odd
 
         % get analysis params for each plane
+        fprintf('analyze R...');
         paramsRed = textureAnalysis(imRed, Nsc, Nor, Na);
+        fprintf('G...');
         paramsGreen = textureAnalysis(imGreen, Nsc, Nor, Na);
+        fprintf('B...');
         paramsBlue = textureAnalysis(imBlue, Nsc, Nor, Na);
         
         % Generate each plane's texture
@@ -99,29 +124,42 @@ function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL
 
         % generate textures for each plane here, and create a combined
         % image
-        imRedTexture = uint8(textureSynthesis(paramsRed, [Nsx, Nsy, randomSeed], Niter));
-        imGreenTexture = uint8(textureSynthesis(paramsGreen, [Nsx, Nsy, randomSeed], Niter));
-        imBlueTexture = uint8(textureSynthesis(paramsBlue, [Nsx, Nsy, randomSeed], Niter));
+        fprintf('synthesize R...');
+        imRedTexture = uint8(textureSynthesis(paramsRed, [Nsx, Nsy, randomSeed], Niter, [], []));
+        fprintf('G...');
+        imGreenTexture = uint8(textureSynthesis(paramsGreen, [Nsx, Nsy, randomSeed], Niter, [], []));
+        fprintf('B...');
+        imBlueTexture = uint8(textureSynthesis(paramsBlue, [Nsx, Nsy, randomSeed], Niter, [], []));
+        fprintf('create color texture...');
         imcolortextureFINAL = cat(3, imRedTexture, imGreenTexture, imBlueTexture);
 
         % make bw texture using the color texture
+        fprintf('create bw texture...');
         imbwtextureFINAL = rgb2gray(imcolortextureFINAL);
 
         % Save color image
-        mean_imcolorFINAL(i) = mean(imcolorFINAL(:));
+        fprintf('saving files...\n');
         imwrite(imcolorFINAL, fullfile(folders{1}, outputBasename));
 
         % Save colortexture image
-        mean_imcolortextureFINAL(i) = mean(imcolortextureFINAL(:));
         imwrite(imcolortextureFINAL, fullfile(folders{2}, outputBasename));
 
         % Save bw image
-        mean_imbwFINAL(i) = mean(imbwFINAL(:));
         imwrite(imbwFINAL, fullfile(folders{3}, outputBasename));
 
         % Save bwtexture image
-        mean_imbwtextureFINAL(i) = mean(imbwtextureFINAL(:));
         imwrite(imbwtextureFINAL, fullfile(folders{4}, outputBasename));
+
+        % MATLAB conversion to rgb uses nearly identical formula to that
+        % used for computing luminance. See MATLAB docs for rgb2gray and
+        % (referred to in rgb2gray doc):
+        % https://www.itu.int/dms_pubrec/itu-r/rec/bt/r-rec-bt.601-7-201103-i!!pdf-e.pdf
+        % (section 2.5.1).
+        % L = 0.299 * R + 0.587 * G + 0.114 * B
+        mean_imcolorFINAL(i) = mean(0.299*imRed(:) + 0.587*imGreen(:) + 0.114*imBlue(:));
+        mean_imcolortextureFINAL(i) = mean(0.299*imRedTexture(:) + 0.587*imGreenTexture(:) + 0.114*imBlueTexture(:));
+        mean_imbwFINAL(i) = mean(imbwFINAL(:));
+        mean_imbwtextureFINAL(i) = mean(imbwtextureFINAL(:));
 
         fprintf('%d:col    = %s\n', i, fullfile(folders{1}, outputBasename));
         fprintf('%d:coltex = %s\n', i, fullfile(folders{2}, outputBasename));
