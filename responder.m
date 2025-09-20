@@ -129,7 +129,11 @@ classdef responder < handle
                     responseIndex= keyCode;
                     break;
                 end
-
+                % If we get here, it means we checked a keycode and didn't
+                % find it in the responses. Get the next keypress. 
+                % This is really only relevant when there are input keypresses
+                % that are not in Responses.
+                [keyPressed, keyCode, tPressed] = obj.nextPress();
             end
         end
     end
