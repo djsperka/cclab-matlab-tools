@@ -94,6 +94,20 @@ classdef responder < handle
             end
         end
 
+        function [isKey, keyCode, tKey] = anykey(obj)
+            % ANYKEY() check for any keyPRESS, independent of the currently
+            % set Responses{}. Any keypress is accepted, and the literal
+            % keycode is returned (not the response id in Responses{}).
+            % This can be used when using the responder as an actual
+            % response device, but also for gathering other input - e.g.
+            % operator input. Be careful to flush() before switching uses,
+            % probably important....
+            saveResponses = obj.Responses;
+            obj.Responses = {};
+            [isKey, keyCode, tKey] = obj.response();
+            obj.Responses = saveResponses();
+        end
+
         function [isResponse, responseIndex, tResponse] = response(obj)
             % Get the oldest response from the device, if any. A key PRESS 
             % (of any key whose name is in the first column of Responses)
@@ -102,6 +116,7 @@ classdef responder < handle
             % If so, responseIndex and the response time are assigned. If
             % no response has occurred, then isResponse is false and the
             % values of responseIndex and tResponse are set to nonsense.
+
             isResponse = false;
             responseIndex = -999;
             tResponse = -1;
