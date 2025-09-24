@@ -12,6 +12,7 @@ classdef eyetracker < handle
         ScreenDistanceMM
         Name
         Verbose
+        AlwaysInRect
     end
     
     methods
@@ -43,6 +44,7 @@ classdef eyetracker < handle
             obj.Verbose = p.Results.Verbose>0;
             obj.ScreenWHMM = p.Results.ScreenWH;
             obj.ScreenDistanceMM = p.Results.ScreenDistance;
+            obj.AlwaysInRect = false;
 
             if obj.DummyMode
                 fprintf('Using eyetracker in dummy mode.\n');
@@ -156,12 +158,26 @@ classdef eyetracker < handle
                 fprintf('eyetracker.stop_recording/offline: dummy mode.\n');
             end
         end            
-            
+
+        function always_in_rect(obj, bAlways)
+            obj.AlwaysInRect = bAlways;
+            if bAlways
+                fprintf('WARNING: eyetracker is in "always looking" mode! Actual eye position is ignored.\n');
+            else
+                fprintf('WARNING: "always looking" mode turned off! Actual eye position is used.\n');
+            end
+        end
+
         function [tf] = is_in_rect(obj, rect)
             %is_in_rect Is current eye pos in the rect? Returns 1/0.
-            [x, y, tf] = obj.eyepos();
-            if tf
-                tf = IsInRect(x, y, rect);
+
+            if obj.AlwaysInRect
+                tf = true;
+            else
+                [x, y, tf] = obj.eyepos();
+                if tf
+                    tf = IsInRect(x, y, rect);
+                end
             end
         end
 
