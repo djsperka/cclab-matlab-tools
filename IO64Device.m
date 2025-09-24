@@ -4,13 +4,15 @@ classdef IO64Device < handle
 
     properties
         IOObj
+        Address
     end
 
     methods
-        function obj = IO64Device()
+        function obj = IO64Device(address)
             %UNTITLED Construct an instance of this class
             %   Detailed explanation goes here
             obj.IOObj = io64();
+            obj.Address = address;
             if io64(obj.IOObj) ~= 0
                 error('Cannot install IO64 tool. Check that io64.mex is in your path');
             end
@@ -20,12 +22,12 @@ classdef IO64Device < handle
             clear obj.IOObj;
         end
 
-        function outp(obj, address, byte)
-            io64(obj.IOObj, address, byte);
+        function outp(obj, byte)
+            io64(obj.IOObj, obj.Address, byte);
         end
 
-        function [byte] = inp(obj, address)
-            byte = io64(obj.IOObj, address);
+        function [byte] = inp(obj)
+            byte = io64(obj.IOObj, obj.Address);
         end
 
     end
