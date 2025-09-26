@@ -318,13 +318,13 @@ classdef eyetracker < handle
                     halfH = obj.ScreenWHMM(2)/2;
                     obj.command(sprintf('screen_phys_coords = %0.1f %0.1f %0.1f %0.1f ', -halfW, halfH, halfW, -halfH));
                 else
-                    warning('SCREEN DIMENSIONS NOT PROVIDED. TRACKER IS GUESSING HERE!!!');
+                    warning('SCREEN DIMENSIONS NOT PROVIDED. Using tracker configuration.');
                 end
 
                 if ~isempty(obj.ScreenDistanceMM)
                     obj.command(sprintf('screen_distance = %0.1f', obj.ScreenDistanceMM));
                 else
-                    warning('SCREEN DISTANCE NOT PROVIDED. TRACKER IS GUESSING HERE!!!');
+                    warning('SCREEN DISTANCE NOT PROVIDED. Using tracker configuration.');
                 end
                     
 
