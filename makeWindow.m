@@ -18,13 +18,18 @@ function [windowPtr,windowRect, mywr] = makeWindow(wh,screen,a1,a2,bkgd)
 %   [0.5,0.5,0.5].
 
     arguments
-        wh (1,2) {mustBeNumeric}
-        screen (1,1) {mustBeInteger,mustBeGreaterThanOrEqual(screen,0)}
+        wh {mustBeNumeric} = []
+        screen (1,1) {mustBeInteger,mustBeGreaterThanOrEqual(screen,0)} = 0
         a1 {mustBeText,mustBeMember(a1,{'center','left','right','top','bottom'})} = 'center'
         a2 {mustBeText,mustBeMember(a2,{'center','left','right','top','bottom'})} = 'center'
         bkgd (1,3) {mustBeNumeric,mustBeLessThanOrEqual(bkgd,1),mustBeGreaterThanOrEqual(bkgd,0)} = [.5, .5, .5]
     end
     PsychDefaultSetup(2);
+    % empty wh is full screen
+    if isempty(wh)
+        r = Screen('Rect', screen);
+        wh=r(3:4);
+    end
     r=SetRect(0,0,wh(1),wh(2));
     sr=Screen('Rect', screen);
     mywr=AlignRect(r,sr,a1,a2);
