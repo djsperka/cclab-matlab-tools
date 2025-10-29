@@ -155,18 +155,17 @@ classdef responder < handle
 
     methods (Access = private)
         function [keyPressed, keyCode, tPressed] = nextPress(obj)
-            bDone = false;
             keyPressed = false;
             keyCode = 0;
             tPressed = -1;
-            while ~bDone && KbEventAvail(obj.DevIndex) 
+            while KbEventAvail(obj.DevIndex) 
                 [event, ~] = KbEventGet(obj.DevIndex);
                 %fprintf('code %3d pressed %d t %f\n', event.Keycode, event.Pressed, event.Time);
                 if event.Pressed
-                    bDone = true;
                     keyPressed = true;
                     keyCode = event.Keycode;
                     tPressed = event.Time;
+                    break;
                 end
             end
         end
