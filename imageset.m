@@ -24,18 +24,48 @@ classdef imageset
     % set to true (it is false by default).
     
     properties
+
+        % File extensions used in search for images
         Extensions
+
+        % root folder for image archive
         Root
+
+        % The last folder name in the Root folder is the Name
         Name
+
+        % Optional function that provides parameters for this imageset.
         ParamsFunc
+
+        % Mapping of key letters to subfolders
         Subfolders
+
+        % Optional function to process images as they are loaded. The
+        % output of this function is used for generating textures.
         OnLoadFunc
+
+        % BalancedFileKeys is a list of file keys that are balanced --
+        % meaning there is an image for each of the subfolders loaded.
+        % IsBalanced is true if all images are present in all subfolders.
         IsBalanced
         BalancedFileKeys
+
+        % If any images don't make it into BalancedFileKeys, they'll be in
+        % this list
         MissingKeys
+
+        % Background color used
         Bkgd
+
+        % If true, then all images in this set are the same size. 
         IsUniform
+
+        % This is the rect that describes images in this set if IsUniform
+        % is true. If IsUniform is false, then this is the rect of the
+        % first image in the set (not a very meaningful rect)
         UniformOrFirstRect
+
+
         MaskParameters
     end
 
@@ -51,15 +81,6 @@ classdef imageset
             %imageset Load images from a set of folders. Each folder has a
             %key prefix. Full key for each file is prefix + '/' + basename.
             %   Detailed explanation goes here
-            
-            % arguments
-            %     root {mustBeFolder}
-            %     options.ParamsFunc {mustBeText} = ''
-            %     options.SubFolders {mustBeProperSubfolderCell} = {}
-            %     options.Extensions {mustBeText} = {'.bmp', '.jpg', '.png'};
-            %     options.OnLoad
-            % 
-            % 
 
             p = inputParser;
             %addRequired(p, 'Root', @(x) ischar(x) && isdir(x));
@@ -231,9 +252,12 @@ classdef imageset
         
         
         function textureID = texture(obj, varargin)
-            %texture call MakeTexture for this image, with opt. contrast
-            %[0,1]
-            %   Detailed explanation goes here
+            %texture call MakeTexture for this image, and return the
+            %texture ID. 
+            %   Image key passed must be found in the imageset. A
+            %   preprocess function handle can be passed. If so, the image
+            %   is passed to the function, and the result is converted to a
+            %   texture. 
             
             
             % parse
@@ -267,7 +291,7 @@ classdef imageset
         end
         
         function [r, isUniform] = rect(obj, k)
-            % Return rect that contains the image with key 'k'. If 'k' is
+            % RECT Return rect that contains the image with key 'k'. If 'k' is
             % omitted or empty, then returns the rect for all images in the
             % imageset. 'isUniform' tells whether all images in this set
             % have the same size. If an imageset is NOT uniform, the rect
