@@ -31,16 +31,18 @@ function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL
         options.doHisteq {mustBeNumericOrLogical} = 0,
         options.testfile char = ''              % use 'file.ext'
         options.nFiles (1,1) {mustBeNumeric} = 0 % cannot use this and testfile
+        options.square {mustBeNumericOrLogical} = []   % crop largest square
     end
 
 
     % if doHisteq is true, we will process raw image using histeq.
     % if not, deal is a no-op
-    if options.doHisteq
-        onLoadFunc = @histeq;
-    else
-        onLoadFunc = @deal;
-    end
+    onLoadFunc = @(x) myprocess(x, options.doHisteq, options.square);
+    % if options.doHisteq
+    %     onLoadFunc = @histeq;
+    % else
+    %     onLoadFunc = @deal;
+    % end
 
 
     % Create subfolders beneath 'outputFolderRoot'.
@@ -180,4 +182,17 @@ function [basenames, mean_imcolorFINAL, mean_imcolortextureFINAL, mean_imbwFINAL
     subplot(2,2,4);
     histogram((mean_imbwFINAL-mean_imcolortextureFINAL)./mean_imbwFINAL, [-.05:.01:.05]);
     title('bw-colortexture');
+end
+
+function img = myprocess(I, doHistEq, doSquare)
+    img = I;
+    if doHistEq
+        img = histeq(img);
+    end
+    if doSquare
+        smallestside = min(size(img, 1:2));
+        targetsize = [smallestside, smallestside];
+        win1 = centerCropWindow2d(size(img),targetsize);
+        img=imcrop(img, win1);
+    end
 end
