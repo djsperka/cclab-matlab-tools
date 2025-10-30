@@ -1,4 +1,4 @@
-function [ok,response] = intermission(window, responder, str, textsize)
+function [ok,response] = intermission(window, q, qind, str, textsize)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -8,12 +8,12 @@ function [ok,response] = intermission(window, responder, str, textsize)
     Screen('Flip', window);
     DrawFormattedText(window, str, 'center', 'center', [0, 0, 0]);
     Screen('Flip', window);
-    responder.start();
+    q.start(qind);
     t0 = GetSecs;
     ok = false;
     response = -999;
     while ~ok && (GetSecs-t0)<timeout
-        [ok, response, ~] = responder.response();
+        [ok, response, ~] = q.response(qind);
     end
     Screen('TextSize', window, oldtextsize);
     Screen('Flip', window);
