@@ -5,6 +5,7 @@ classdef SplitKbQueue < handle
     %   Detailed explanation goes here
 
     properties
+        NumQueues
         Keylists
         KbIndex
         Queues
@@ -45,7 +46,9 @@ classdef SplitKbQueue < handle
 
             % When filters is {}, this should behave like a keyboard queue
             if isempty(options.filters)
-                obj.Keylists = ones(256, 1);
+                obj.NumQueues = 1;
+                keylist = ones(256, 1);
+                obj.Keylists = keylist;
                 obj.Queues = {CQueue()};
             else
                 % when filters isn't empty, the row is fed to KbName, which
@@ -54,10 +57,11 @@ classdef SplitKbQueue < handle
                 % For each filter given, create a CQueue object to hold its
                 % events.
                 keylist = zeros(256, 1);
-                obj.Keylists = zeros(256, length(options.filters));
-                obj.Queues = cell(length(options.filters), 1);
-                obj.QindStarted = false(length(options.filters), 1);
-                for i=1:length(options.filters)
+                obj.NumQueues = length(options.filters);
+                obj.Keylists = zeros(256, obj.NumQueues);
+                obj.Queues = cell(obj.NumQueues, 1);
+                obj.QindStarted = false(obj.NumQueues, 1);
+                for i=1:obj.NumQueues
                     thiskeylist = zeros(256,1);
                     thiskeylist(KbName(options.filters(i))) = 1;
                     keylist(KbName(options.filters(i))) = 1;
@@ -83,8 +87,8 @@ classdef SplitKbQueue < handle
             % start all of them. Check if the underlying queue is started
             % and start if needed.
             
-            if qind > length(obj.Filters)
-                error('qind (%d) out of range 1-%d', qind, length(obj.Filters));
+            if qind > obj.NumQueues
+                error('qind (%d) out of range 1-%d', qind, obj.NumQueues);
             end
 
             if ~obj.KbQueueStarted
@@ -109,8 +113,8 @@ classdef SplitKbQueue < handle
 
             obj.get();
 
-            if qind > length(obj.Filters)
-                error('qind (%d) out of range 1-%d', qind, length(obj.Filters));
+            if qind > obj.NumQueues
+                error('qind (%d) out of range 1-%d', qind, obj.NumQueues);
             end
 
             if qind<1
@@ -163,7 +167,7 @@ classdef SplitKbQueue < handle
 
             obj.get();
             if isempty(qind)
-                for i=1:length(obj.Queues)
+                for i=1:obj.NumQueues
                     obj.dumpQueue(i);
                 end
             else
