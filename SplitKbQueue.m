@@ -14,6 +14,7 @@ classdef SplitKbQueue < handle
         KbQueueCreated
         KbQueueStarted
         QindStarted
+        Verbose
     end
 
     methods
@@ -27,12 +28,14 @@ classdef SplitKbQueue < handle
                                             % response() will return
                                             % keycode, otherwise expecting
                                             % {{0}, {1}}
+                options.verbose logical = false
             end
             obj.KbIndex = ind;
             obj.Filters = options.filters;
             obj.Responses = options.responses;
             obj.KbQueueCreated = false;
             obj.KbQueueStarted = false;
+            obj.Verbose = options.verbose;
 
             % do this before anything else
             KbName('UnifyKeyNames');
@@ -146,12 +149,12 @@ classdef SplitKbQueue < handle
 
         function dumpQueue(obj, qind)
             if obj.Queues{qind}.isempty()
-                fprintf('Split queue %d is empty.\n', qind);
+                obj.Verbose && fprintf('Split queue %d is empty.\n', qind);
             else
-                fprintf('Split queue %d has %d elements:\n', qind, obj.Queues{qind}.size());
+                obj.Verbose && fprintf('Split queue %d has %d elements:\n', qind, obj.Queues{qind}.size());
                 while ~obj.Queues{qind}.isempty()
                     e=obj.Queues{qind}.pop();
-                    fprintf('%d (%s)\n', e.Keycode, KbName(e.Keycode));
+                    obj.Verbose && fprintf('%d (%s)\n', e.Keycode, KbName(e.Keycode));
                 end
             end
         end
@@ -185,14 +188,13 @@ classdef SplitKbQueue < handle
                         if obj.Keylists(event.Keycode,i) > 0
                             if obj.QindStarted(i)
                                 obj.Queues{i}.push(event);
-                                fprintf('add key %s to queue %d\n', KbName(event.Keycode), i);
+                                obj.Verbose && fprintf('add key %s to queue %d\n', KbName(event.Keycode), i);
                             else
-                                fprintf('skip key %s queue %d stopped\n', KbName(event.Keycode), i);
+                                obj.Verbose && fprintf('skip key %s queue %d stopped\n', KbName(event.Keycode), i);
                             end
                         end
                     end
                 end
-                %fprintf('code %3d (%s) pressed %d t %f\n', event.Keycode, KbName(event.Keycode), event.Pressed, event.Time);
             end
         end
 
