@@ -24,18 +24,19 @@ classdef pixdegconverter
         function obj = pixdegconverter(rect, varargin)
             %pix_deg_converter Construct an instance of this class
             %   Detailed explanation goes here
-            obj.W = rect(3);
-            obj.H = rect(4);
+            obj.W = rect(3)-rect(1);
+            obj.H = rect(4)-rect(2);
             if nargin == 2
-                obj.PPD = rect(3)/varargin{1};
+                obj.PPD = (rect(3)-rect(1))/varargin{1};
                 obj.PPMM = nan;
             elseif nargin == 3
+
                 % args should be (rect, [screenWidthMM, screenHeightMM], eyeDistMM), both in mm
                 scrdims = varargin{1};
                 scrdist = varargin{2};
                 fovx = 2*atan2(scrdims(1)/2, scrdist) * 180 / pi;
-                obj.PPD = rect(3) / fovx;
-                obj.PPMM = rect(3) / scrdims(1);
+                obj.PPD = (rect(3)-rect(1)) / fovx;
+                obj.PPMM = (rect(3)-rect(1)) / scrdims(1);
             else
                 error('One or two args to pixdeg converter');
             end
