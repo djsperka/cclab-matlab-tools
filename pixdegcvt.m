@@ -12,7 +12,7 @@ classdef pixdegcvt
         Hphys
         Dphys
         Type
-        NoWarn
+        DoWarn
     end
     
     methods
@@ -31,7 +31,7 @@ classdef pixdegcvt
             obj.Hphys = screenwh(2);
             obj.Dphys = screendistance;
             obj.Type = type;
-            obj.NoWarn = options.nowarn;
+            obj.DoWarn = options.dowarn;
 
             switch obj.Type
                 case 'onedeg'
@@ -43,14 +43,14 @@ classdef pixdegcvt
                     obj.PPMM = obj.Wpix / obj.Wphys;
                 case 'accurate'
                     obj.PPD = 0;
-                    obj.PPMM = 0;
+                    obj.PPMM = obj.Wpix / obj.Wphys;    % use average for all cases
             end
         end
         
         function PIX = deg2pix(obj, DEG)
             %deg2pix Convert values from degrees to pixels. 
             %   Use this for lengths, e.g. diameter, not coordinates. See deg2scr for x,y pairs.
-            if ~isscalar(DEG) && ~obj.NoWarn
+            if ~isscalar(DEG) && obj.DoWarn
                 warning('Using deg2pix on a non-scalar object. Use this method for lengths, use deg2scr to get screen coordinates.');
             end
             if ~strcmp(obj.Type,'accurate')
@@ -61,15 +61,10 @@ classdef pixdegcvt
         end
 
         function MM = deg2mm(obj, DEG)
-            %deg2mm Convert values from degrees to mm. Only works when this
-            %object created with w,h. When created with fovx, will warn bu
-            %take a guess. 
+            %deg2mm Convert values from degrees to mm. For all types, we
+            %use the average value for pixels per mm.
             pix = obj.deg2pix(DEG);
             ppmm = obj.PPMM;
-            if isnan(obj.PPMM)
-                ppmm = 3;
-                warning('pixdegconverter is just guessing at the pixel size.')
-            end
             MM = arrayfun(@(p) p/ppmm, pix);
         end
         
@@ -93,7 +88,7 @@ classdef pixdegcvt
             %deg2pix Summary of this method goes here
             %   Detailed explanation goes here            
 
-            if ~isscalar(PIX) && ~obj.NoWarn
+            if ~isscalar(PIX) && obj.DoWarn
                 warning('Using pix2deg on a non-scalar object. Use this method for lengths, not coordinates.');
             end
 
