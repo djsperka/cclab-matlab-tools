@@ -23,7 +23,7 @@ classdef imageset
     % All images are read and saved unless the 'Lazy' flag is
     % set to true (it is false by default).
     
-    properties
+    properties (SetAccess = immutable)
 
         % File extensions used in search for images
         Extensions
@@ -136,10 +136,12 @@ classdef imageset
             else
                 obj.Subfolders = p.Results.Subfolders;
             end
+
+            % remove dots from the extensions
             if isfield(Y,'Extensions')
-                obj.Extensions = Y.Extensions;
+                obj.Extensions = erase(Y.Extensions, '.');
             else
-                obj.Extensions = p.Results.Extensions;
+                obj.Extensions = erase(p.Results.Extensions, '.');
             end
             if isfield(Y,'OnLoadFunc')
                 obj.OnLoadFunc = Y.OnLoadFunc;
@@ -578,6 +580,7 @@ classdef imageset
                 fname = fullfile(d(i).folder, d(i).name);
                 if isfile(fname)
                     [~,base,ext] = fileparts(fname);
+                    ext = erase(ext, '.');  % extension includes dot
 
                     % Check file extension
                     if any(strcmpi(ext, obj.Extensions))
