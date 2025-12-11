@@ -17,10 +17,47 @@ classdef SplitKbQueue < handle
         Verbose
     end
 
-    methods
+    methods (Access = private)
+        function get(obj)
+            %Gets all events from PTB queue and distributes them to saved
+            %queues, if they are started.
+            while KbEventAvail(obj.KbIndex) 
+                [event, ~] = KbEventGet(obj.KbIndex);
+                if event.Pressed
+                    for i=1:size(obj.Keylists, 2)
+                        if obj.Keylists(event.Keycode,i) > 0
+                            if obj.QindStarted(i)
+                                obj.Queues{i}.push(event);
+                                obj.Verbose && fprintf('add key %s to queue %d\n', KbName(event.Keycode), i);
+                            else
+                                obj.Verbose && fprintf('skip key %s queue %d stopped\n', KbName(event.Keycode), i);
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        function dumpQueue(obj, qind)
+            if obj.Queues{qind}.isempty()
+                obj.Verbose && fprintf('Split queue %d is empty.\n', qind);
+            else
+                obj.Verbose && fprintf('Split queue %d has %d elements:\n', qind, obj.Queues{qind}.size());
+                while ~obj.Queues{qind}.isempty()
+                    e=obj.Queues{qind}.pop();
+                    obj.Verbose && fprintf('%d (%s)\n', e.Keycode, KbName(e.Keycode));
+                end
+            end
+        end
+
+    end
+
+    methods (Access = public)
         function obj = SplitKbQueue(ind, options)
-            %SplitKbdQueue Construct an instance of this class
-            %   Detailed explanation goes here
+            %SplitKbdQueue Create a split kb queue using device number
+            %'ind'. The keys accepted (and the response values returned for
+            %them) are specified with options 'filters' and 'responses'. 
+            %   
             arguments
                 ind (1,1) {mustBeNumeric}
                 options.filters cell = {}   % each row {'a','b'} any length
@@ -75,7 +112,6 @@ classdef SplitKbQueue < handle
 
             KbQueueCreate(obj.KbIndex, keylist);
             obj.KbQueueCreated = true;
-
         end
 
         function delete(obj)
@@ -147,18 +183,6 @@ classdef SplitKbQueue < handle
             end
         end
 
-        function dumpQueue(obj, qind)
-            if obj.Queues{qind}.isempty()
-                obj.Verbose && fprintf('Split queue %d is empty.\n', qind);
-            else
-                obj.Verbose && fprintf('Split queue %d has %d elements:\n', qind, obj.Queues{qind}.size());
-                while ~obj.Queues{qind}.isempty()
-                    e=obj.Queues{qind}.pop();
-                    obj.Verbose && fprintf('%d (%s)\n', e.Keycode, KbName(e.Keycode));
-                end
-            end
-        end
-
         function dump(obj, qind)
             %Prints information on all events in queue to screen. Queue is
             %cleared when done.
@@ -175,26 +199,6 @@ classdef SplitKbQueue < handle
                 end
             else
                 obj.dumpQueue(qind);
-            end
-        end
-
-        function get(obj)
-            %Gets all events from PTB queue and distributes them to saved
-            %queues, if they are started.
-            while KbEventAvail(obj.KbIndex) 
-                [event, ~] = KbEventGet(obj.KbIndex);
-                if event.Pressed
-                    for i=1:size(obj.Keylists, 2)
-                        if obj.Keylists(event.Keycode,i) > 0
-                            if obj.QindStarted(i)
-                                obj.Queues{i}.push(event);
-                                obj.Verbose && fprintf('add key %s to queue %d\n', KbName(event.Keycode), i);
-                            else
-                                obj.Verbose && fprintf('skip key %s queue %d stopped\n', KbName(event.Keycode), i);
-                            end
-                        end
-                    end
-                end
             end
         end
 
