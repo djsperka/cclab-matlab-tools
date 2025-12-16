@@ -13,23 +13,72 @@ Input arguments:
 - _root_ - root folder. Images are found in subfolders defined in SubFolders.
 - _paramsFunc_ - (optional). Name of a function (which can be found with current path), or a path to a function (including function name, but not extension). This function should return a structure where the field names match any of the optional variables. The values of those fields are used in the construction of the object. 
 - _SubFolders = SUBFOLDERS_. Nx2 cell array. First column is name of a subfolder (below _root_). Second column is a string to use in the key for images from this folder. The key for images in this folder is _folderkey/filebase_. There can be multiple subfolders. No combination of _folderkey/filebase_ can appear more than once in a single imageset.
+- _Extensions = EXTENSIONS_. 1xN cell array of file extensions to include. Default is `{'.bmp', '.jpg', '.png'}`
+- _OnLoad = FUNCTION\_HANDLE_. A processing function that is run on each image as read by imread(). This function should accept a single image and return a single image. Default is a no-op (deal()). 
+- _MaskParameters = MASK\_ARRAY_. An array of parameters for a simple mask. If the array has a single element, [P], the image will be resized to PxP pixels. An array with three `[a,b,c]` elements will have the image blended with the background, using a circular mask which is the product of two masks: the first has a radius `a`: ```exp(-0.5 * r\*\*2/c\*\*2)```. The second is a `1` inside of radius `r1`, and then is a linear ramp down to `0` at radius 'a' (and zero at larger radii). The net effect is a circular image faded to the background at r=`a`. 
+- _Bkgd = [a,b,c]_. Background color to use. Default is `[0.5,0.5,0.5]`. This applies when using the MaskParameters. Also if you use the texture key 'BKGD'. 
+- _ShowName = 1|0_. Default is `false`. For testing, will show name of image on top of texture. Must have image processing toolbox.
+- _Lazy = true|false_. Default is `false`. If true, images are not loaded until they are actually needed. The default is false (OK for our imagesets, 400 images `256x256`.)
 
+Each subfolder in _SUBFOLDERS[:,1]_ is searched for images with _EXTENSIONS_. Any that are found are loaded (unless `Lazy=true`) and given a _key_. The corresponding _folder key_ value in the second column of _SUBFOLDERS_ is used with the _file key_ (the basename of the image file) to form a key for the image: _folder key/file key_. 
 
-
-I'm using the repo 'cclab-images' for examples below. 
-
-The simplest way to use is to identify a folder where images reside. Subfolders are NOT searched!
-
-```matlab
-img = imageset('/home/dan/work/cclab/cclab-images/test');
-```
-
-To quickly check the contents of an imageset, open a window and call `flip()`. The texture is displayed at the center of the window, full size. 
-
+For example, we put high salience black and white images in a subfolder called _bw_, and low salience texturized version of the same images into a subfolder called _tex_. The images are named with a digit from 1-100. Our `Subfolders` argument looks like this:
 
 ```matlab
-img.flip(windowID, 'R-1');
+Subfolders = { 'bw', 'H'; 'tex', 'L'};
 ```
+
+In the subfolder _bw_, images _1.bmp, 2.bmp, ..., 99.bmp, 100.bmp_ are loaded and given keys _'H/1', 'H/2', ..., 'H/99', 'H/100'_. Similarly, subfolder _tex_, which has images with the same filenames (each image being the texturized version of its original in subfolder _bw_), will have its images given keys _'L/1', 'L/2', ..., 'L/99', 'L/100'_. 
+
+
+#### [textureID] = texture(w, key[, PreProcessFunc=func])
+
+Creates a texture using the image having key `key`. If a `PreProcessFunc` is given, it should accept an image as input and should return an image. The default is `deal` (a no-op). The `textureID` returned should be used in calls to `Screen('DrawTexture', ...)` or `Screen('DrawTextures', ...)`. A `textureID` can be used multiple times, but only on the window used when created here. The texture also uses resources, so if you display many textures, you should eventually free them with `Screen('Close', textureID)`. 
+
+#### [tf] = is_key(key)
+
+Returns true (false) if the key is found (is not found) in the imageset. 
+
+#### [rect] = rect(key)
+
+Returns a PTB rectangle representing the size of the image with key `key`. 
+
+#### flip(w, key[, PreProcessFunc=func])
+
+For testing, will display image `key` at the center of window `w`. The image is preprocessed by `func`, before the texture is created, if given.
+
+#### mflip(w, keys[, PreProcessFunc=func])
+
+Same as `flip()`, but works with multiple images. Pass keys as a cellstr, e.g.: `{'key1', 'key2', 'key3'}`. Will attempt to fit all textures onto screen, but will not try that hard. Don't rely on this in an experiment - testing only! 
+
+#### [fname] = filename(key)
+
+Return the full pathname for the image file with key `key`.
+
+#### [image] = get_image(key)
+
+Return the image loaded (whatever was returned by imread) for `key`.
+
+#### [keys] = keys(regex)
+
+Returns a cell array with all keys that match the regular expression `regex`. This is the string of a regex, not a compiled regular expression. 
+
+### Methods (static)
+
+These are utilities I use when creating sets of trials that have lists of image keys. 
+
+#### [key] = imageset.make_key(folder_key, file_key)
+
+Creates a key using the given folder and file key. Nothing special, just contatenate the string folder and file keys with a '/' sandwiched in between. Will work with cell arrays of folder and/or file keys. Special case when _folder_key_ is `'*'`, the key returned is `'BKGD'`. 
+
+#### [key] = imageset.make_key(folder_key, file_key)
+
+Same as `imageset.make_key`, but for lists of keys.
+
+#### [folder_key, file_key] = imageset.split_key(key)
+
+Split the given key back into its parts. 
+
 
 
 ## SplitKbQueue
