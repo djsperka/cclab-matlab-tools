@@ -9,7 +9,7 @@ The pump generates a signal (which is available on the breakout box for "Rig-rig
 In the absence of that signal, we can still know the approximate onset of the reward *as long as there is a reliable signal adjacent to the reward signal*. I tested this using a script which generated TTL pulses "A" and "B" both before and after a reward of fixed length.
 
 
-![Timing diagram](rwdtiming.png "Reward Timing")
+![Timing diagram](doc/rwdtiming.png "Reward Timing")
 
 
 Here, "A" and "B" refer to calls made to cclabPulse('A', 250) and cclabPulse('B', 250), putting 250ms square pulse on to signal lines "A" and "B". The "Running" period is when the pump motor is running. The "G0" and "G1" period are time gaps between the motor onset/offset and the adjacent pulses. *Note that the gaps G0 and G1 are measured relative to when the previous pulse is complete, not when it starts!*
