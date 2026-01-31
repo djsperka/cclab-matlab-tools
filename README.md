@@ -9,3 +9,5 @@ Collection of matlab tools for cclab.
 * [Helpers for psychophysics experiments](miscpsycho.md)
 
 * [Class for using the ASL Eyetracker](eyetracker.md)
+
+* [Notes on timing of rewards](rewardtiming.md)

@@ -198,7 +198,7 @@ The converter class, called ```pixdegcvt```, will perform conversions for a syst
 Create the object like this:
 
 ```matlab
-myconverter = pixdegcvt(screen\_rect\_pixels, screen\_size\_mm, screen\_distance\_mm);
+myconverter = pixdegcvt(screen_rect_pixels, screen_size_mm, screen_distance_mm);
 ```
 
 where 
@@ -216,28 +216,32 @@ These methods do the conversions:
 Convert a value from degrees to pixels \- a distance, or the size of a displayed graphic:
 
 ```
-npixels = myconverter.**deg2pix**(distance\_in\_degrees);
+npixels = myconverter.deg2pix(distance_in_degrees);
 ```
 
 #### pix2deg
 
 Convert from pixels to degrees
 
-    ndegrees = myconverter.**pix2deg**(npixels);
+```
+ndegrees = myconverter.pix2deg(npixels);
+```
 
 #### deg2scr
 
 Convert an (x,y) coordinate in degrees to screen coordinates
 
-
-    scr\_coords = myconverter.**deg2scr**(\[0,0\]);  % get screen coords of the center of screen
+```
+scr_coords = myconverter.deg2scr([0,0]);  % get screen coords of the center of screen
+```
 
 #### deg2mm
 
 Convert a 'distance' in degrees to mm
 
-
-    mm = myconverter.**deg2mm**(degrees);
+```
+mm = myconverter.deg2mm(degrees);
+```
 
 ### Example 
 
