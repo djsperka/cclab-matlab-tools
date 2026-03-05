@@ -185,7 +185,7 @@ Psychtoolbox's Screen function lets you open a window for displaying graphics. T
 
 *screenID*: PTB's screen identifier
 
-*side1,side2*: for positioning the created window on your desktop. See the PTB function **AlignRect** for details. Allowed values for these are 'center', 'left', 'right',  'top', and 'bottom'. Using 'center', 'right' will put the window along the center of the right\-hand edge of your screen
+*side1,side2*: for positioning the created window on your desktop. See the PTB function [**AlignRect**](http://psychtoolbox.org/docs/AlignRect) for details. Allowed values for these are 'center', 'left', 'right',  'top', and 'bottom'. Using 'center', 'right' will put the window along the center of the right\-hand edge of your screen
 
 
 *color*: PTB-style color, \[r,g,b\], where each value is between 0,1
@@ -197,6 +197,22 @@ The function returns these values:
 *windowRect*: PTB-style rectangle describing the window (left, top are both 0)
 
 *fullScreenRect*: PTB-style rectangle describing the window within the full screen window
+
+### Example
+
+Here's how I use this function to put a window on my screen, on the right-hand side and out of the way so I can still see/use the edit screen on the left.
+
+```
+[windowIndex, windowRect, bigRect] = makeWindow([400,300], 0, 'center', 'right');
+```
+
+The `windowIndex` is used in calls to Screen-type drawing functions. For example, to put an image with key 'H/10'
+on this screen:
+
+```
+img = imageset(fullfile(ethImgRoot, 'MoreBabies'), 'paramsCircEdge256');
+img.flip(windowIndex, 'H/19');
+```
 
 
 ## pixdegcvt
