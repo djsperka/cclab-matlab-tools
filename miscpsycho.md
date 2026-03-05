@@ -1,5 +1,14 @@
 # Misc Tools for Psychophysics experiments
 
+- [imageset](#imageset): a class for displaying images on a PTB Screen
+- [SplitKbQueue](#splitkbqueue): a class for using keyboard as a response device and expt control
+- [makeWindow](#makewindow): convenience method that puts a screen up that you can test with
+- [pixdegcvt](#pixdegcvt): a helper class for pixel-degree-screen coordinate conversions
+- [randomizeParams](#randomizeParams): a method that creates a table of all combinations of parameters, randomized.
+
+
+
+
 ## imageset
 
 `imageset` provides a portable and flexible way to display images from a folder or a set of folders.
@@ -311,3 +320,169 @@ Issue `sca` to close the window.
 ```matlab
 sca;
 ```
+
+
+
+## randomizeParams
+
+This function creates a Matlab table, where each row is a unique set of parameters. The parameters and the range of values that they take is specified on the command line. Useful for setting up parameters for a series of trials. The table returned can be further manipulated to add additional columns. 
+
+
+```matlab
+>> vars = {'Number'; 'Letter'};
+>> reps = {[1:3]';['A';'B';'C']};
+>> table = randomizeParams('VariableNames', vars, 'Replacements', reps)
+
+table =
+
+  9×2 table
+
+    Number    Letter
+    ______    ______
+
+      2         A   
+      3         A   
+      1         C   
+      3         B   
+      1         A   
+      2         C   
+      3         C   
+      2         B   
+      1         B   
+```
+
+### Usage in ethosal expt
+
+In the ethological salience expt, I generate trials in a method `generateEthBlocksImgV2`. The trials are generated using `randomizeParams`. Here is how it is used there (edited):
+
+```matlab
+replacements = {};
+columnNames = {};
+
+% In order to randomize over all image presentations, we will randomize
+% the images and their salience. 
+% The images are identified by their key: folder_key/file_key
+% Rather than work directly with the file keys, I work with an integer 
+% index value, and get the file_key by dereferencing the index. 
+
+% let nPairs be the number of image pairs we need. Here a pair is the combination of left&right image.
+% Each individual image has an actual file key. Use the 'ImagePairIndex' to get it later.
+% The actual file keys would come from imageset, and it's a cell array (column) with strings for each 
+% file basename. In this experiment, we've named the files '1.bmp', '2.bmp' and so on, so the file keys
+% look like `{'1';'2';'3';'4';'5';}`, but maybe longer.
+
+% Create a fake array of file keys (see note above - this should be from a balanced file keys set)
+% I made this list with 25 elements. We are only going to draw 10 pairs, so there will be leftovers. 
+nFileKeys = 25;
+FileKeys=cellfun(@(x) num2str(x), num2cell([1:nFileKeys])', 'UniformOutput', false);
+
+% If the 'FlipPair' parameter is true, then the two images are always the *same* image.
+% If it is false, then the two images can be different. The construction of the imagePairs 
+% matrix reflects this.
+FlipPair = true;    % would normally be set on command line
+
+if ~FlipPair
+    imagePairs=reshape(randperm(nFileKeys, nPairs*2), [nPairs,2]);
+else
+    imagePairsTmp = randperm(nFileKeys, nPairs);
+    imagePairs = vertcat(imagePairsTmp, imagePairsTmp)';
+end
+
+
+
+nPairs = 10;
+replacements{1} = (1:nPairs)';
+columnNames{1} = 'ImagePairIndex';
+
+% The 'FolderKeys' argument to this function will be randomized over _columns_, 
+% and then _rows_ within the column.
+% In this experiment, the first row is always the HIGH SALIENCE image (the letter is connected to 
+% the actual folder holding the file by the mapping in imageset). 
+% For an experiment with a single type of images, e.g. baby faces, there is a single column, and
+% two rows (high and low salience), and FolderKeys looks like this:
+
+FolderKeys= {'H'; 'L'};
+
+% FolderKeyColumn
+replacements{end+1} = (1:size(FolderKeys,2))';
+columnNames{end+1} = 'FolderKeyColumn';
+
+% FolderKey1Row (left image), Folder2KeyRow(right)
+replacements{end+1} = (1:size(FolderKeys,1))';
+columnNames{end+1} = 'Folder1KeyRow';
+
+replacements{end+1} = (1:size(FolderKeys,1))';
+columnNames{end+1} = 'Folder2KeyRow';
+
+% TestType is a value indicating which stimulus (1=left, 2=right) will be tested                
+% The value used in 'replacements' depends on the type of trials being generated. 
+% If we have "neutral" trials, then both sides are tested.
+% For this example, let's do neutral trials/
+trialTypes = 'neutral';
+switch (trialTypes)
+    case 'neutral'
+        replacements{end+1}=[1;2];
+    case 'left'
+        replacements{end+1}=[1];
+    case 'right'
+        replacements{end+1}=[2];
+end
+columnNames{end+1} = 'StimTestType';
+                
+% change(1)/nochange(0) test
+replacements{end+1} = [0;1];
+columnNames{end+1} = 'StimChangeTF';
+                
+% This generates trials with things distributed over the elements of
+% names/reps.
+tab1 = randomizeParams('VariableNames', columnNames, 'Replacements', replacements);
+nTrials = height(tab1);
+```
+
+The resulting table can be further manipulated. To add a column with a fixed value, name the column and assign a column vector of the correct length:
+
+```matlab
+% Add a column boolean for saying that a trial has started
+tab1.Started = false(nTrials, 1);
+
+% Add a column with an index for each trial. When trials are re-done, this index stays the same. 
+tab1.trialIndex = (1:nTrials)';
+```
+
+The creation of the image keys for the imageset:
+
+```matlab
+
+% the array imagePairs is an Nx2 array. Each value is an index into FileKeys. 
+% The first column represents the image for stimulus 1 (left). The second column 
+% represents stimulus 2 (right).
+
+
+
+% Now make File1Key and File2Key
+tab1.File1Key = FileKeys(imagePairs(tab1.ImagePairIndex,1));
+tab1.File2Key = FileKeys(imagePairs(tab1.ImagePairIndex,2));
+
+% Now make Folder1Key and Folder2Key
+tab1.Folder1KeyColumn = tab1.FolderKeyColumn;
+tab1.Folder2KeyColumn = tab1.FolderKeyColumn;
+
+tab1.Folder1Key = FolderKeys(sub2ind(size(FolderKeys), tab1.Folder1KeyRow(:), tab1.Folder1KeyColumn(:)));
+tab1.Folder2Key = FolderKeys(sub2ind(size(FolderKeys), tab1.Folder2KeyRow(:), tab1.Folder2KeyColumn(:)));
+
+% StimA1Key and StimA2Key
+tab1.StimA1Key = imageset.make_keys(tab1.Folder1Key, tab1.File1Key);
+tab1.StimA2Key = imageset.make_keys(tab1.Folder2Key, tab1.File2Key);
+
+
+```
+
+The columns 'Stim1AKey' and 'Stim2AKey' are keys to use against the imageset loaded for this experiment. See *ethologV2.m* for more detailed usage.
+
+
+```
+texture_1a = images.texture(windowIndex, trial.StimA1Key);
+texture_2a = images.texture(windowIndex, trial.StimA2Key);
+```
+
+
