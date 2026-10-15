@@ -4,12 +4,15 @@ classdef FixationPoint
 
     properties (Access = public)
         XY
+        X
+        Y
         Diameter
         Color
         DirVecs
     end
 
     properties (Access = private)
+        Diam
         Type
         Lines
         Rect
@@ -31,36 +34,56 @@ classdef FixationPoint
             end
 
             obj.XY = xy;
-            obj.Diameter = diameter;
+            obj.Diam = diameter;
             obj.Color = color;
             obj.DirVecs = options.dirvecs;
-            if isscalar(obj.Diameter)
-                xdiam = obj.Diameter;
-                ydiam = obj.Diameter;
-            else
-                xdiam = obj.Diameter(1);
-                ydiam = obj.Diameter(2);
-            end                        
-
             obj.Type = fixptType;
-            switch obj.Type
-                case 'o'
-                    % make a rectangle that contains the oval
-                    obj.Rect = CenterRectOnPoint(SetRect(0, 0, xdiam, ydiam), obj.XY(1), obj.XY(2));
-                case '+'
-                    % Lines for the fixation "+" sign. The array fixLines has x,y values in
-                    % rows, one column for each line segment.
-                    obj.Lines = [ ...
-                        obj.XY(1) + xdiam/2, obj.XY(2); ...
-                        obj.XY(1) - xdiam/2, obj.XY(2); ...
-                        obj.XY(1), obj.XY(2) + ydiam/2; ...
-                        obj.XY(1), obj.XY(2) - ydiam/2
-                        ]';
-                    obj.Thickness = options.thickness;
-                otherwise
-                    error('Unhandled fixpt type');
+            obj.Thickness = options.thickness;
+            if ~ismember(fixptType, 'o+')
+                error('Unhandled fixpt type');
             end
+        end
 
+        function diameter = get.Diameter(obj)
+            if isscalar(obj.Diam)
+                xdiam = obj.Diam;
+                ydiam = obj.Diam;
+            else
+                xdiam = obj.Diam(1);
+                ydiam = obj.Diam(2);
+            end  
+            diameter = [xdiam, ydiam];
+        end
+
+        function r = get.Rect(obj)
+            diameter = obj.Diameter;
+            r = CenterRectOnPoint(SetRect(0, 0, diameter(1), diameter(2)), obj.XY(1), obj.XY(2));
+        end
+
+        function l = get.Lines(obj)
+            radii = obj.Diameter/2;
+            l = [ ...
+                obj.XY(1) + radii(1), obj.XY(2); ...
+                obj.XY(1) - radii(1), obj.XY(2); ...
+                obj.XY(1), obj.XY(2) + radii(2); ...
+                obj.XY(1), obj.XY(2) - radii(2)
+                ]';
+        end
+
+        function obj = set.X(obj, x)
+            if isnumeric(x) && isscalar(x)
+                obj.XY(1) = x;
+            else
+                error('X value must be numeric scalar');
+            end
+        end
+
+        function obj = set.Y(obj, y)
+            if isnumeric(y) && isscalar(y)
+                obj.XY(2) = y;
+            else
+                error('Y value must be numeric scalar');
+            end
         end
 
         function draw(obj,w,cue)
