@@ -1,15 +1,17 @@
-function [values] = XMLfun(SorF,nodeNameToFind,funcOrAttributeName)
+function [values] = XMLfun(SorF,nodeNameToFind,funcNoneOrAttributeName)
 %XMLfun Pull attribute values out of an xml file, or perform a function at
 %each node with a given name.
 %   This function parses the xml file (the struct returned for a file 
 % parsed with parseXML can also be passed), and traverses the xml tree
 % (depth-first) looking for any nodes named 'nodeNameToFind' (use dotted
-% notation). If found, one of two things can happen. If
+% notation). If found, one of three things can happen. If
 % 'funcOrAttributeName' is a function handle, then that function is called
 % with the current node as its only argument. If 'funcOrAttributeName' is a
 % character vector or cell string, then the values should be Attribute
 % names, and the values associated with each attribute are returned in a
-% cell array of the same shape as 'funcOrAttrName'. 
+% cell array of the same shape as 'funcOrAttrName'. Finally, if
+% 'funcOrNoneOrAttributeName' is empty '', then the data associated with
+% the node is returned. 
 %
 % Simple case: Find the values of attribute 'filename' in the node
 % 'PVScan.Sequence.Frame.File':
@@ -58,16 +60,25 @@ function [values] = XMLfun(SorF,nodeNameToFind,funcOrAttributeName)
         error('First arg must be a struct (from a parsed XML file) or an xml filename.');
     end
 
-    if isa(funcOrAttributeName, 'function_handle')
-        useFunc = funcOrAttributeName;
+    if isa(funcNoneOrAttributeName, 'function_handle')
+        useFunc = funcNoneOrAttributeName;
+    elseif length(funcNoneOrAttributeName)
+        useFunc = @(x) getAttrValue(x,funcNoneOrAttributeName);
     else
-        useFunc = @(x) getAttrValue(x,funcOrAttributeName);
+        useFunc = @(x) getDataValue(x);
     end    
     values = nodefunc(S, '', nodeNameToFind, useFunc);
 
 end
 
 function [val] = nodefunc(sNode,toThisPoint,seekingThisNodeName,f)
+
+    % parseXML saves empty space as a node with Name='#text'. Skip these
+    % nodes.
+    if strcmp(sNode.Name, '#text')
+        val = {};
+        return;
+    end
 
     if isempty(toThisPoint)
         thisNodeName = sNode.Name;
@@ -106,6 +117,10 @@ end
 
 function mustBeFunctionHandleOrAttrName(f)
     assert(ischar(f) || iscellstr(f) || isa(f,'function_handle'));
+end
+
+function [v] = getDataValue(node)
+    v = node.Children.Data;
 end
 
 function [v] = getAttrValue(node,attrName)
